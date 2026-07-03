@@ -2,6 +2,7 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import {
   appendLog,
   exists,
@@ -147,6 +148,8 @@ const inputContent = contentFile ? await fs.readFile(contentFile, "utf8") : awai
 const imageInputs = args("--image");
 const shouldSnapshot = !has("--no-snapshot");
 const shouldMirrorImages = !has("--no-mirror-images");
+const shouldRefreshDashboard = has("--refresh-dashboard") || has("--serve-dashboard");
+const shouldServeDashboard = has("--serve-dashboard");
 const date = new Date().toISOString().slice(0, 10);
 const capturedAt = new Date().toISOString();
 const rawDir = path.join(vault, "raw");
@@ -269,9 +272,10 @@ await fs.writeFile(target, body, "utf8");
 await appendLog(`CAPTURE_RAW source="${path.relative(vault, target)}" type="${sourceType}" snapshot="${snapshot?.path || ""}"`);
 
 let refresh = null;
-if (!has("--no-refresh")) {
-  const refreshScript = new URL("./refresh-dashboard.mjs", import.meta.url).pathname;
-  const result = spawnSync("node", [refreshScript, "--serve"], { encoding: "utf8" });
+if (shouldRefreshDashboard) {
+  const refreshScript = path.join(path.dirname(fileURLToPath(import.meta.url)), "refresh-dashboard.mjs");
+  const refreshArgs = shouldServeDashboard ? ["--serve"] : [];
+  const result = spawnSync("node", [refreshScript, ...refreshArgs], { encoding: "utf8" });
   const jsonStart = result.stdout.indexOf('{\n  "vault"');
   refresh = {
     status: result.status,
@@ -290,8 +294,8 @@ console.log(JSON.stringify({
   mirroredImageFailures: mirroredContent.failures,
   explicitImages: explicitImages.length,
   refreshed: refresh?.status === 0,
-  dashboard: refresh?.stdout?.url || "not refreshed",
+  dashboard: refresh?.stdout?.url || "not requested",
   next: refresh?.status === 0
-    ? "Read this raw note, synthesize wiki pages, close related links, mark processed only after wiki backlinks exist. Dashboard graph has already been refreshed."
-    : "Read this raw note, synthesize wiki pages, close related links, mark processed only after wiki backlinks exist, then refresh the dashboard."
+    ? "Read this raw note, synthesize wiki pages, close related links, mark processed only after wiki backlinks exist. Dashboard graph was refreshed because it was explicitly requested."
+    : "Read this raw note, synthesize wiki pages, close related links, and mark processed only after wiki backlinks exist. Refresh or start the dashboard only when graph visualization is requested."
 }, null, 2));

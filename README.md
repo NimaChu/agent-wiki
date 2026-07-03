@@ -50,6 +50,8 @@ npm run dashboard
 npm run dashboard:build
 ```
 
+Dashboard refresh and serving are intentionally on-demand. Routine captures and wiki edits should not start the dashboard; use dashboard commands only when you want to inspect the graph or work on visualization.
+
 Direct CLI:
 
 ```bash
@@ -63,7 +65,7 @@ node scripts/karpathy-wiki.mjs help
 3. Link wiki claims back to raw evidence.
 4. Keep `wiki/index.md` useful as the main entry point.
 5. Run lint/garden/repair regularly.
-6. Use the dashboard for graph browsing and health checks.
+6. Use the dashboard on demand for graph browsing, visualization, and health checks.
 
 ## External Knowledge Connectors
 

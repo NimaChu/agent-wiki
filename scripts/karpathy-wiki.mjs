@@ -14,7 +14,7 @@ const commands = {
   refresh: ["refresh-dashboard.mjs", ...rest],
   dashboard: ["refresh-dashboard.mjs", "--serve", ...rest],
   build: ["refresh-dashboard.mjs", "--build", ...rest],
-  "build-dashboard": ["refresh-dashboard.mjs", "--serve", "--build", ...rest],
+  "build-dashboard": ["refresh-dashboard.mjs", "--build", ...rest],
   garden: ["garden.mjs", ...rest],
   "repair-links": ["repair-links.mjs", ...rest],
   "distill-query": ["distill-query.mjs", ...rest],
@@ -32,6 +32,8 @@ Usage:
   node scripts/karpathy-wiki.mjs refresh [--serve] [--build]
   node scripts/karpathy-wiki.mjs build-dashboard
   node scripts/karpathy-wiki.mjs capture --title "Title" --url "https://..." --type webpage
+  node scripts/karpathy-wiki.mjs capture --title "Title" --url "https://..." --refresh-dashboard
+  node scripts/karpathy-wiki.mjs capture --title "Title" --url "https://..." --serve-dashboard
   node scripts/karpathy-wiki.mjs search "query terms"
   node scripts/karpathy-wiki.mjs garden
   node scripts/karpathy-wiki.mjs repair-links

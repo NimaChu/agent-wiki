@@ -39,6 +39,8 @@ npm run wiki:capture -- --title "Source title" --url "https://example.com"
 npm run dashboard
 ```
 
+Dashboard commands are on-demand visualization tools. Do not refresh or start the dashboard during routine ingest or wiki edits unless the user explicitly asks to view the graph, inspect the dashboard, or work on visualization.
+
 ## Ingest
 
 Use this when adding a webpage, article, PDF, transcript, or long-form note.
@@ -49,7 +51,7 @@ Use this when adding a webpage, article, PDF, transcript, or long-form note.
 4. Extract durable claims and entities into existing or new pages under `wiki/`.
 5. Link wiki pages back to raw notes with `[[raw/path-or-title]]` links.
 6. Add a short entry to `wiki/log.md`.
-7. Refresh the dashboard automatically after ingest or meaningful wiki edits.
+7. Do not refresh or start the dashboard by default. Run `npm run dashboard` or `npm run wiki:refresh` only when the user asks to view the knowledge graph, inspect the dashboard, or perform visualization work.
 
 ## Query
 

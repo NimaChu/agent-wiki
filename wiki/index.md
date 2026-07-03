@@ -22,6 +22,8 @@ This is the main entry point for the vault.
 
 Add durable wiki pages here as the vault grows.
 
+- [[检索增强生成 RAG]] - RAG workflow, use cases, and implementation tradeoffs.
+
 ## Maintenance
 
 - Review `[[log]]` after each ingest or substantial wiki edit.

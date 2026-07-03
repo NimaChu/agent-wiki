@@ -10,9 +10,15 @@ const shouldServe = process.argv.includes("--serve");
 const shouldBuild = process.argv.includes("--build");
 const vault = vaultPath();
 const dash = dashboardPath(vault);
+const npmCommand = "npm";
+const npmOptions = { cwd: dash, shell: process.platform === "win32" };
 
 function run(command, args) {
-  const result = spawnSync(command, args, { cwd: dash, stdio: "inherit" });
+  const result = spawnSync(command, args, { ...npmOptions, stdio: "inherit" });
+  if (result.error) {
+    console.error(result.error.message);
+    process.exit(1);
+  }
   if (result.status !== 0) process.exit(result.status || 1);
 }
 
@@ -36,17 +42,17 @@ if (!(await exists(dash))) {
 }
 
 if (!(await exists(path.join(dash, "node_modules")))) {
-  run("npm", ["install"]);
+  run(npmCommand, ["install"]);
 }
 
-run("npm", ["run", "graph"]);
-if (shouldBuild) run("npm", ["run", "build"]);
+run(npmCommand, ["run", "graph"]);
+if (shouldBuild) run(npmCommand, ["run", "build"]);
 
 if (shouldServe && !(await isServerAlive())) {
   const logPath = path.join(dash, "vite.log");
   const logFd = openSync(logPath, "a");
-  const child = spawn("npm", ["run", "dev", "--", "--port", String(DASHBOARD_PORT)], {
-    cwd: dash,
+  const child = spawn(npmCommand, ["run", "dev", "--", "--port", String(DASHBOARD_PORT)], {
+    ...npmOptions,
     detached: true,
     stdio: ["ignore", logFd, logFd]
   });
