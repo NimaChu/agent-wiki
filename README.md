@@ -1,27 +1,71 @@
 # Agent Wiki
 
-Agent Wiki is a self-contained Markdown knowledge vault for agent workflows.
+Zero-cost, beginner-friendly local knowledge base for AI agents.
 
-It is inspired by Karpathy-style LLM Wiki workflows: preserve raw evidence, compile reusable wiki pages, keep links healthy, and expose an Obsidian-like local graph dashboard. It does not require Obsidian or any Codex skill install.
+Agent Wiki gives you a practical way to own a private Markdown knowledge base without paying for a SaaS app, running a database, learning Obsidian, or building a RAG stack from scratch. Drop it into a workspace, ask your coding agent to capture sources, and let the agent maintain `raw/` evidence, `wiki/` pages, image references, search, lint, and an optional graph dashboard.
 
-## Requirements
+If you can open a terminal and talk to an agent, you can have a local knowledge base.
 
-- Node.js 18+
-- npm
+## Why Agent Wiki
 
-Optional:
+- **Zero cost by default**: plain files, local scripts, no hosted database, no required API subscription.
+- **Zero foundation friendly**: the workflow is made for people who want the agent to do the organizing, linking, and maintenance.
+- **Local first**: your notes, raw sources, snapshots, and images stay in your workspace.
+- **Agent native**: every folder and command is designed so Codex, Claude Code, Cursor, or another coding agent can keep the vault healthy.
+- **Evidence based**: raw captures stay separate from distilled wiki pages, so answers can point back to sources.
+- **Image aware**: screenshots and diagrams can be mirrored locally and promoted into answer-ready visual evidence.
+- **No dashboard tax**: the graph dashboard is only built or started when you actually want visualization.
+- **GitHub friendly**: publish the tool, keep your private knowledge local.
 
-- Obsidian, if you want a human editor with backlinks, Graph View, Dataview, and templates.
-- External knowledge connectors such as IMA, only after the user confirms and configures them.
+## What You Get
+
+```text
+raw/        source notes, snapshots, evidence, image inventories
+wiki/       durable knowledge pages synthesized from raw sources
+templates/  reusable raw and wiki page templates
+scripts/    local CLI for capture, search, lint, repair, images, dashboard
+tools/      optional local graph dashboard
+```
+
+Agent Wiki is intentionally simple: Markdown in, Markdown out. You can inspect everything with a text editor, search it with ripgrep, sync the tool code with GitHub, and keep private knowledge out of commits.
 
 ## Quick Start
 
 ```bash
+git clone https://github.com/NimaChu/agent-wiki.git
+cd agent-wiki
+npm install
 npm run wiki:status
 npm run wiki:lint
 ```
 
-Open the dashboard only when you want graph visualization:
+Then ask your agent:
+
+```text
+Maintain the local knowledge base in this workspace. Capture useful sources into raw/, distill durable notes into wiki/, keep links healthy, and do not start the dashboard unless I ask for visualization.
+```
+
+## Capture A Source
+
+```bash
+npm run wiki:capture -- --title "Source title" --url "https://example.com"
+```
+
+Search the vault:
+
+```bash
+npm run wiki:search -- "query terms"
+```
+
+Check health:
+
+```bash
+npm run wiki:lint
+npm run wiki:garden
+npm run wiki:repair-links
+```
+
+Open the graph only when you want to see it:
 
 ```bash
 npm run dashboard
@@ -31,14 +75,49 @@ npm run dashboard
 http://127.0.0.1:5173/
 ```
 
-## Project Layout
+## Core Workflow
 
-- `raw/` stores source notes and evidence metadata.
-- `wiki/` stores durable synthesized knowledge pages.
-- `templates/` stores reusable raw/wiki templates.
-- `scripts/` stores the local CLI for status, lint, search, capture, repair, gardening, and dashboard refresh.
-- `tools/wiki-dashboard/` stores the read-only graph dashboard.
-- `AGENTS.md` is the operating contract for agents using this folder as a workspace.
+1. Capture source material into `raw/`.
+2. Preserve the original evidence, metadata, snapshots, links, and images.
+3. Distill reusable concepts into `wiki/`.
+4. Link wiki claims back to raw evidence.
+5. Run lint, search, garden, and repair commands as maintenance.
+6. Open the dashboard only when graph visualization is useful.
+
+This keeps the knowledge base honest: raw evidence remains available, while the wiki becomes increasingly useful for agent answers.
+
+## Image Evidence
+
+For image-rich articles, tutorials, and official docs, treat images as evidence.
+
+```bash
+npm run wiki:images -- --source raw/source-note.md
+```
+
+The image workflow:
+
+- extracts Markdown and HTML image references,
+- mirrors useful remote images into `raw/assets/<source-note>/`,
+- writes `image-index.json`,
+- updates the raw note with image counts and a `## Images` table.
+
+When a topic page needs visual support, promote only the best images into a `## Visual Evidence` section. Agents can then include the relevant screenshots or diagrams when answering questions.
+
+## Firecrawl MCP, Optional
+
+Agent Wiki works without Firecrawl, but this repo includes a minimal `.mcp.json` for the hosted Firecrawl MCP endpoint:
+
+```text
+https://mcp.firecrawl.dev/v2/mcp
+```
+
+The hosted keyless MCP tier can expose tools such as `scrape`, `search`, and `interact` to MCP-capable agents without a Firecrawl API key, subject to Firecrawl limits. Full Firecrawl tools may require authentication.
+
+Use Firecrawl as a capture helper, not as the source of truth:
+
+1. Ask the agent to scrape or search.
+2. Review the useful result.
+3. Save selected evidence into Agent Wiki with `npm run wiki:capture`.
 
 ## Commands
 
@@ -54,79 +133,40 @@ npm run dashboard
 npm run dashboard:build
 ```
 
-Dashboard refresh and serving are intentionally on-demand. Routine captures and wiki edits should not start the dashboard; use dashboard commands only when you want to inspect the graph or work on visualization.
-
-## Firecrawl MCP
-
-This workspace includes a minimal `.mcp.json` for the hosted Firecrawl MCP server:
-
-```text
-https://mcp.firecrawl.dev/v2/mcp
-```
-
-The hosted keyless tier lets MCP-capable agents use `scrape`, `search`, and `interact` without a Firecrawl API key, subject to rate limits. Full tools such as `crawl`, `map`, `agent`, and `extract` require Firecrawl auth. If you later want the full tool set, replace the URL with:
-
-```text
-https://mcp.firecrawl.dev/{FIRECRAWL_API_KEY}/v2/mcp
-```
-
-Use Firecrawl MCP as an agent capture tool, not as the vault source of truth:
-
-1. Ask the agent to scrape/search/interact with Firecrawl MCP.
-2. Review or summarize the useful result.
-3. Ingest the selected evidence through `npm run wiki:capture` using stdin or `--content-file`.
-
-Example:
-
-```bash
-npm run wiki:capture -- --title "Source title" --url "https://example.com"
-```
-
-If the current Codex thread does not show Firecrawl tools immediately, reload/open a new thread after the workspace MCP config is detected.
-
-## Image Evidence
-
-For image-rich articles and official docs, treat screenshots and diagrams as evidence, not decoration.
-
-After capturing a raw note with useful images or snapshot paths, run:
-
-```bash
-npm run wiki:images -- --source raw/source-note.md
-```
-
-This command:
-
-- extracts Markdown and HTML images from the raw note and its snapshots,
-- mirrors remote images into `raw/assets/<source-note>/`,
-- writes `raw/assets/<source-note>/image-index.json`,
-- updates the raw note with `image_index_path`, image counts, and a `## Images` table.
-
-When synthesizing a wiki page, promote only the most useful images into a `## Visual Evidence` section. Keep full inventories in `raw/`. When an agent answers a user question, it should inspect `## Visual Evidence`, `## Images`, and `image-index.json`; if images clarify the answer, include 1-3 relevant images with captions.
-
 Direct CLI:
 
 ```bash
 node scripts/karpathy-wiki.mjs help
 ```
 
-## Workflow
+## What To Commit
 
-1. Capture sources into `raw/`.
-2. Compile durable concepts, topics, people, companies, products, or methods into `wiki/`.
-3. Link wiki claims back to raw evidence.
-4. Keep `wiki/index.md` useful as the main entry point.
-5. Run lint/garden/repair regularly.
-6. Use the dashboard on demand for graph browsing, visualization, and health checks.
+Agent Wiki separates project code from personal knowledge:
 
-## External Knowledge Connectors
+- Commit and push reusable tool improvements: scripts, templates, dashboard code, docs.
+- Keep private or bulky knowledge local: raw captures, snapshots, mirrored assets, personal wiki pages.
 
-External knowledge bases are optional. Do not assume they exist.
+This makes the repository useful as open source while keeping your actual knowledge base under your control.
 
-Before using IMA or another connector, the agent should ask the user to confirm:
+## Requirements
 
-- which connector is available,
-- what knowledge base or folder should be searched,
-- whether local pointer notes may be created under `raw/external/` or `raw/ima/`,
-- whether source identifiers may be written into wiki pages.
+- Node.js 18+
+- npm
 
-Keep external originals outside this repository unless the user explicitly requests local capture and has the right to store the material.
+Optional:
+
+- Obsidian, if you want a human editor with backlinks and graph view.
+- MCP tools such as Firecrawl, when your agent environment supports them.
+- External knowledge connectors, only when you intentionally configure them.
+
+## Who It Is For
+
+Agent Wiki is for people who want:
+
+- a local second brain that an agent can maintain,
+- source-grounded answers instead of loose chat history,
+- a private knowledge workflow without SaaS lock-in,
+- an open, inspectable alternative to heavyweight RAG stacks,
+- a simple bridge between web capture, Markdown notes, images, and agent search.
+
+Bring your questions. Let the agent tend the garden.
