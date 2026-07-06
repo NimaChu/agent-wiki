@@ -13,6 +13,10 @@ sources:
 
 # {{title}}
 
+## Scope
+
+This page should cover one durable knowledge unit: one concept, entity, method, API, workflow, comparison, or recurring question. Split unrelated ideas into separate wiki pages and link them here.
+
 ## Summary
 
 One or two paragraphs explaining the topic in durable language.

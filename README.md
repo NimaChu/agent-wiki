@@ -44,8 +44,10 @@ npm run wiki:lint
 Then ask your agent:
 
 ```text
-Maintain the local knowledge base in this workspace. Capture useful sources into raw/, distill durable notes into wiki/, keep links healthy, and do not start the dashboard unless I ask for visualization.
+Maintain this local knowledge base.
 ```
+
+That short request is enough. Project rules tell the agent to process raw sources in batches, distill durable wiki pages, keep evidence links healthy, avoid GitHub sync for local knowledge, and start the dashboard only when you ask for visualization.
 
 ## Capture A Source
 
@@ -87,6 +89,20 @@ http://127.0.0.1:5173/
 6. Open the dashboard only when graph visualization is useful.
 
 This keeps the knowledge base honest: raw evidence remains available, while the wiki becomes increasingly useful for agent answers.
+
+## Karpathy-Style Wiki Pages
+
+Agent Wiki follows a simple LLM-wiki habit: one durable knowledge unit gets one wiki page.
+
+That means a raw source is not merely summarized once. A useful article, manual, PDF, or transcript may update many wiki pages: one for a concept, one for an API, one for a workflow, one for a comparison, and one for a product or entity. Over time, the wiki becomes a linked map of reusable ideas instead of a pile of one-off summaries.
+
+Good wiki pages are:
+
+- **Atomic**: one concept, entity, method, API, workflow, comparison, or recurring question.
+- **Reusable**: written so a future agent can answer from it without rereading the full source first.
+- **Linked**: connected to related concepts with Obsidian-style `[[Page Name]]` links.
+- **Evidence backed**: important claims point back to raw source notes.
+- **Small enough to maintain**: split pages that become mixed grab bags; merge pages that are duplicates.
 
 ## Image Evidence
 

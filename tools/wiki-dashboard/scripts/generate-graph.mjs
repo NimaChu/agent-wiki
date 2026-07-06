@@ -7,9 +7,21 @@ const appRoot = path.resolve(here, "..");
 const vaultRoot = path.resolve(appRoot, "../..");
 const outputPath = path.join(appRoot, "public", "wiki-graph.json");
 
-const scanRoots = ["raw", "wiki", "templates", "_archive"];
+const scanRoots = ["raw", "wiki"];
 const markdownLinkPattern = /\[\[([^\]|#]+)(?:#[^\]|]+)?(?:\|[^\]]+)?\]\]/g;
 const relationTypes = new Set(["supports", "challenges", "related_to", "applies_to", "company_of", "product_of"]);
+const graphExcludedIds = new Set([
+  "wiki/index",
+  "wiki/log",
+  "wiki/README",
+  "wiki/Autodesk FlexSim 2026 Help",
+  "wiki/FlexSim 2026 Ingest QA",
+  "raw/autodesk-flexsim-2026/0000--table-of-contents"
+]);
+
+function isGraphExcluded(id) {
+  return graphExcludedIds.has(id) || id === "README" || id.endsWith("/README");
+}
 
 async function exists(target) {
   try {
@@ -106,9 +118,28 @@ function inferType(id, frontmatter) {
   if (frontmatter.type) return String(frontmatter.type);
   if (id.startsWith("raw/")) return "raw-source";
   if (id.startsWith("wiki/")) return "wiki";
-  if (id.startsWith("templates/")) return "template";
-  if (id.startsWith("_archive/")) return "archive";
   return "note";
+}
+
+function inferGroup(id, frontmatter) {
+  if (id.startsWith("raw/autodesk-flexsim-2026/")) {
+    const tocPath = String(frontmatter.toc_path || "");
+    const parts = tocPath
+      .split(">")
+      .map((part) => part.trim())
+      .filter(Boolean);
+    if (parts.length >= 2) return `FlexSim / ${parts[0]} / ${parts[1]}`;
+    if (parts.length === 1) return `FlexSim / ${parts[0]}`;
+    return "FlexSim / Corpus";
+  }
+
+  if (id.startsWith("raw/")) return "Raw / Other";
+  if (id.startsWith("wiki/")) {
+    const title = titleFromFrontmatter(frontmatter, id);
+    if (/flexsim/i.test(`${title} ${asArray(frontmatter.tags).join(" ")}`)) return "Wiki / FlexSim";
+    return "Wiki / General";
+  }
+  return id.split("/")[0] || "Other";
 }
 
 function titleFromId(id) {
@@ -175,6 +206,7 @@ async function main() {
         path: id + ".md",
         title: titleFromFrontmatter(frontmatter, id),
         type: inferType(id, frontmatter),
+        group: inferGroup(id, frontmatter),
         status: String(frontmatter.status || "unknown"),
         tags: asArray(frontmatter.tags),
         aliases: asArray(frontmatter.aliases),
@@ -184,18 +216,19 @@ async function main() {
     })
   );
 
+  const graphLoaded = loaded.filter((node) => !isGraphExcluded(node.id));
   const resolve = buildResolver(loaded);
-  const nodeMap = new Map(loaded.map((node) => [node.id, { ...node, out: [], backlinks: [] }]));
+  const nodeMap = new Map(graphLoaded.map((node) => [node.id, { ...node, out: [], backlinks: [] }]));
   const edges = [];
   const seenEdges = new Set();
   const unresolved = [];
   const typedRelations = [];
   const invalidRelations = [];
 
-  for (const node of loaded) {
+  for (const node of graphLoaded) {
     for (const link of node.links) {
       const target = resolve(link);
-      if (target) {
+      if (target && nodeMap.has(target)) {
         const key = `${node.id}->${target}`;
         if (!seenEdges.has(key)) {
           seenEdges.add(key);
@@ -203,6 +236,8 @@ async function main() {
           nodeMap.get(node.id).out.push(target);
           nodeMap.get(target).backlinks.push(node.id);
         }
+      } else if (target) {
+        continue;
       } else if (!node.id.startsWith("_archive/")) {
         unresolved.push({ source: node.id, target: link });
       }
@@ -218,6 +253,7 @@ async function main() {
         invalidRelations.push({ source: node.id, relation: relation.raw, reason: "unresolved-target" });
         continue;
       }
+      if (!nodeMap.has(target)) continue;
       typedRelations.push({ source: node.id, target, kind: relation.kind });
     }
   }
@@ -226,9 +262,9 @@ async function main() {
   for (const node of nodeMap.values()) {
     if (!node.id.startsWith("raw/") || node.status !== "processed") continue;
     const relatedLinks = asArray(loaded.find((item) => item.id === node.id)?.links ?? []).filter((link) => String(link).startsWith("wiki/") || resolve(link)?.startsWith("wiki/"));
-    const resolvedRelated = relatedLinks.map((link) => resolve(link)).filter(Boolean);
+    const resolvedRelated = relatedLinks.map((link) => resolve(link)).filter((target) => target && nodeMap.has(target));
     if (relatedLinks.length === 0) processedIssues.push({ source: node.id, reason: "missing-related" });
-    if (relatedLinks.length > resolvedRelated.length) processedIssues.push({ source: node.id, reason: "unresolved-related" });
+    if (relatedLinks.some((link) => !resolve(link))) processedIssues.push({ source: node.id, reason: "unresolved-related" });
     const hasBacklink = resolvedRelated.some((targetId) => nodeMap.get(targetId)?.out.includes(node.id));
     if (resolvedRelated.length > 0 && !hasBacklink) processedIssues.push({ source: node.id, reason: "missing-wiki-backlink" });
   }

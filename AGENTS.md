@@ -25,6 +25,17 @@ Do not create a separate `codex.md`; this file is the agent rule source of truth
 - `tools/wiki-dashboard/` is read-only graph/dashboard code. It reads Markdown and generated JSON; it is never the source of truth.
 - `.obsidian/`, if added by a user, is optional editor configuration and must not become a runtime dependency.
 
+## Karpathy-Style Wiki Pages
+
+Treat the wiki layer as an atomic LLM-maintained wiki, not as a folder of source summaries.
+
+- Prefer one durable knowledge unit per wiki page: one concept, entity, method, API, workflow, comparison, or recurring question.
+- A single raw source can update many wiki pages. Do not create only one summary page when the source contains multiple reusable ideas.
+- Create missing concept pages when a source repeatedly mentions an important idea that has no durable home yet.
+- Keep `wiki/index.md`, `wiki/log.md`, and README files as navigation or maintenance records, not graph knowledge nodes.
+- Split pages that mix unrelated knowledge units; merge pages that are duplicate names for the same knowledge unit.
+- Link every source-backed claim to raw evidence, but keep the wiki prose synthesis-oriented rather than copied from the source.
+
 ## Commands
 
 Prefer root npm scripts:
@@ -83,6 +94,11 @@ Use this when answering from the vault.
 
 ## Maintain
 
+- Treat short user requests such as `维护知识库`, `维护本地知识库`, `maintain the knowledge base`, or `maintain this vault` as a complete local maintenance request. Do not require the user to restate the full workflow.
+- A maintenance request means: run `npm run wiki:status`, review the queue with `npm run wiki:garden` when useful, process a coherent batch of inbox or weak raw notes, update or create atomic wiki pages, repair wiki-to-wiki and wiki-to-raw evidence links, update `wiki/index.md` and `wiki/log.md` when material knowledge changes, then run `npm run wiki:lint`.
+- For large backlogs, work in reasonable batches. Prefer one corpus section, topic family, source folder, or high-value cluster at a time; report what was completed and what remains instead of trying to finish the whole vault in one oversized pass.
+- Keep knowledge maintenance local. Do not `git add`, commit, push, or otherwise sync local raw/wiki knowledge just because the user asked to maintain the knowledge base.
+- Do not refresh, build, or start the dashboard during maintenance unless the user explicitly asks to view or work on the graph/dashboard.
 - Fix broken links and orphaned pages.
 - Use `garden`, `lint`, and `repair-links` to review the maintenance queue.
 - Merge duplicate concepts when one idea has multiple names.

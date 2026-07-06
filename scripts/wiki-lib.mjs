@@ -48,19 +48,31 @@ export async function walkMarkdown(dir) {
   return files.flat();
 }
 
+function frontmatterBounds(content) {
+  const offset = content.charCodeAt(0) === 0xfeff ? 1 : 0;
+  const start = content.slice(offset).match(/^---\r?\n/);
+  if (!start) return null;
+  const dataStart = offset + start[0].length;
+  const rest = content.slice(dataStart);
+  const end = rest.match(/\r?\n---(?=\r?\n|$)/);
+  if (!end) return null;
+  const dataEnd = dataStart + end.index;
+  const blockEnd = dataEnd + end[0].length;
+  return { dataStart, dataEnd, blockEnd };
+}
+
 export function stripFrontmatter(content) {
-  if (!content.startsWith("---\n")) return content;
-  const end = content.indexOf("\n---", 4);
-  return end === -1 ? content : content.slice(end + 4);
+  const bounds = frontmatterBounds(content);
+  if (!bounds) return content;
+  return content.slice(bounds.blockEnd);
 }
 
 export function parseFrontmatter(content) {
-  if (!content.startsWith("---\n")) return {};
-  const end = content.indexOf("\n---", 4);
-  if (end === -1) return {};
+  const bounds = frontmatterBounds(content);
+  if (!bounds) return {};
   const data = {};
   let key = null;
-  for (const line of content.slice(4, end).split("\n")) {
+  for (const line of content.slice(bounds.dataStart, bounds.dataEnd).split(/\r?\n/)) {
     const keyMatch = line.match(/^([A-Za-z0-9_-]+):\s*(.*)$/);
     if (keyMatch) {
       key = keyMatch[1];
