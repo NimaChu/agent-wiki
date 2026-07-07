@@ -72,12 +72,14 @@ npm run wiki:repair-links
 Open the graph only when you want to see it:
 
 ```bash
-npm run dashboard
+npm run dashboard:open
 ```
 
 ```text
 http://127.0.0.1:5173/
 ```
+
+Agents should treat requests like "show the graph", "open the frontend", or "open the dashboard" as a request to run `npm run dashboard:open`.
 
 ## Core Workflow
 
@@ -148,6 +150,7 @@ npm run wiki:search -- "query terms"
 npm run wiki:capture -- --title "Source title" --url "https://example.com"
 npm run wiki:images -- --source raw/source-note.md
 npm run dashboard
+npm run dashboard:open
 npm run dashboard:build
 ```
 

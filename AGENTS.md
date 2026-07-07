@@ -49,9 +49,12 @@ npm run wiki:search -- "query terms"
 npm run wiki:capture -- --title "Source title" --url "https://example.com"
 npm run wiki:images -- --source raw/source-note.md
 npm run dashboard
+npm run dashboard:open
 ```
 
-Dashboard commands are on-demand visualization tools. Do not refresh or start the dashboard during routine ingest or wiki edits unless the user explicitly asks to view the graph, inspect the dashboard, or work on visualization.
+Dashboard/frontend commands are on-demand visualization tools. Do not refresh, start, or open the dashboard during routine ingest or wiki edits unless the user explicitly asks to view the knowledge graph, open the frontend, inspect the dashboard, or work on visualization.
+
+Treat short user requests such as `看知识图谱`, `打开知识图谱`, `打开前端`, `打开 dashboard`, `show the graph`, `open the frontend`, or `open the dashboard` as complete requests to run `npm run dashboard:open`. That command should refresh the graph, ensure the local Agent Wiki frontend is running, and open `http://127.0.0.1:5173/` in the browser.
 
 ## Firecrawl MCP
 
@@ -77,7 +80,7 @@ Use this when adding a webpage, article, PDF, transcript, or long-form note.
 6. Extract durable claims and entities into existing or new pages under `wiki/`.
 7. Link wiki pages back to raw notes with `[[raw/path-or-title]]` links.
 8. Add a short entry to `wiki/log.md`.
-9. Do not refresh or start the dashboard by default. Run `npm run dashboard` or `npm run wiki:refresh` only when the user asks to view the knowledge graph, inspect the dashboard, or perform visualization work.
+9. Do not refresh, start, or open the dashboard by default. Run `npm run dashboard:open` when the user asks to view the knowledge graph, open the frontend/dashboard, inspect the dashboard, or perform visualization work. Use `npm run dashboard` or `npm run wiki:refresh` only when opening the browser is not requested.
 
 ## Query
 
@@ -98,7 +101,7 @@ Use this when answering from the vault.
 - A maintenance request means: run `npm run wiki:status`, review the queue with `npm run wiki:garden` when useful, process a coherent batch of inbox or weak raw notes, update or create atomic wiki pages, repair wiki-to-wiki and wiki-to-raw evidence links, update `wiki/index.md` and `wiki/log.md` when material knowledge changes, then run `npm run wiki:lint`.
 - For large backlogs, work in reasonable batches. Prefer one corpus section, topic family, source folder, or high-value cluster at a time; report what was completed and what remains instead of trying to finish the whole vault in one oversized pass.
 - Keep knowledge maintenance local. Do not `git add`, commit, push, or otherwise sync local raw/wiki knowledge just because the user asked to maintain the knowledge base.
-- Do not refresh, build, or start the dashboard during maintenance unless the user explicitly asks to view or work on the graph/dashboard.
+- Do not refresh, build, start, or open the dashboard during maintenance unless the user explicitly asks to view or work on the graph/frontend/dashboard.
 - Fix broken links and orphaned pages.
 - Use `garden`, `lint`, and `repair-links` to review the maintenance queue.
 - Merge duplicate concepts when one idea has multiple names.
