@@ -136,6 +136,8 @@ function inferType(id, frontmatter) {
 }
 
 function inferGroup(id, frontmatter) {
+  if (frontmatter.group) return String(frontmatter.group);
+
   if (id.startsWith("raw/autodesk-flexsim-2026/")) {
     const tocPath = String(frontmatter.toc_path || "");
     const parts = tocPath

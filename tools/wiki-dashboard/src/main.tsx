@@ -196,9 +196,12 @@ function App() {
     return graph.edges.filter((edge) => filteredNodeIds.has(edge.source) && filteredNodeIds.has(edge.target));
   }, [graph, filteredNodeIds]);
   const displayEdges = useMemo(() => {
-    if (graphMode === "knowledge" && graphScope === "global" && !focusedGroup) return [];
+    if (graphMode === "knowledge" && graphScope === "global" && !focusedGroup) {
+      if (!activeSelectedId) return [];
+      return filteredEdges.filter((edge) => edge.source === activeSelectedId || edge.target === activeSelectedId);
+    }
     return filteredEdges;
-  }, [filteredEdges, focusedGroup, graphMode, graphScope]);
+  }, [activeSelectedId, filteredEdges, focusedGroup, graphMode, graphScope]);
 
   const canRotateLayout = graphMode === "knowledge" && graphScope === "global" && Boolean(focusedGroup);
   const layoutRotation = canRotateLayout ? rotation : initialRotation;
@@ -611,6 +614,7 @@ function GraphView({
           <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
         </radialGradient>
       </defs>
+      {canEnterGroup && groupLayer}
       <g className="edge-layer">
         {edges.map((edge) => {
           const source = layoutById.get(edge.source);
@@ -681,7 +685,6 @@ function GraphView({
           );
         })}
       </g>
-      {canEnterGroup && groupLayer}
     </svg>
   );
 }
@@ -1545,7 +1548,6 @@ function DegreeLegend() {
 }
 
 function buildGroupLabels(layout: LayoutNode[]): GroupLabel[] {
-  if (layout.length < 80) return [];
   const buckets = new Map<string, LayoutNode[]>();
   for (const node of layout) {
     const group = node.group ?? inferFallbackGroup(node);
@@ -1573,7 +1575,7 @@ function buildGroupLabels(layout: LayoutNode[]): GroupLabel[] {
         radius
       };
     })
-    .filter((label) => label.count >= 8 || label.group.startsWith("Wiki /"))
+    .filter((label) => label.count > 0)
     .sort((a, b) => b.count - a.count || a.group.localeCompare(b.group))
     .slice(0, 16);
 }
