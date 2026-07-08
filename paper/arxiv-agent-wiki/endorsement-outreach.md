@@ -18,7 +18,7 @@ These recipients were selected because they have public contact information and 
 | --- | --- | --- |
 | John Yang | johnby@stanford.edu | SWE-agent / SWE-bench author; agent-computer interfaces for software engineering. |
 | Carlos E. Jimenez | carlosej@cs.princeton.edu | SWE-agent / SWE-bench author; agentic AI for software engineering. |
-| Kilian Lieret | kl5675@princeton.edu | SWE-agent contact; agentic AI for code and SWE-agent ecosystem. |
+| Kilian Lieret | kilian.lieret@posteo.de | SWE-agent contact; agentic AI for code and SWE-agent ecosystem. Original Princeton address auto-replied with this new address on 2026-07-08. |
 | Chunqiu Steven Xia | chunqiu2@illinois.edu | Agentless and LLM-based software engineering agents. |
 | Lingming Zhang | lingming@illinois.edu | Software engineering, code LLMs, agents, program repair. |
 | Junwei Liu | jwliu24@m.fudan.edu.cn | Lead/contact for LLM-based agents for software engineering survey. |
