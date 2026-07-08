@@ -20,7 +20,7 @@ console.log(`Vault: ${scan.vault}`);
 console.log("");
 console.log(JSON.stringify(stats, null, 2));
 printQueue("Inbox raw sources", inbox);
-printQueue("IMA pointer raws", imaPointers);
+printQueue("Legacy IMA pointer raws", imaPointers);
 printQueue("Needs follow-up", followup);
 if (processedIssues.length) {
   console.log("\nProcessed raws with closure issues:");

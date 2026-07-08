@@ -1,31 +1,47 @@
 #!/usr/bin/env node
 import { promises as fs } from "node:fs";
-import os from "node:os";
 import path from "node:path";
-import { exists, slugify, vaultPath, yamlString } from "./wiki-lib.mjs";
+import { exists, slugify, vaultPath } from "./wiki-lib.mjs";
+import {
+  createImaClient,
+  defaultImaBaseUrl,
+  fetchImaOriginal,
+  hasImageReferences,
+  logImaImport,
+  materializeOriginal,
+  mediaTypeLabel,
+  rawImaMarkdown,
+  readImaCredentials,
+  runImageAssets
+} from "./ima-local-lib.mjs";
 
 const vault = vaultPath();
 const rawImaDir = path.join(vault, "raw", "ima");
-const defaultBaseUrl = "https://ima.qq.com";
 const args = process.argv.slice(2);
 
 function usage() {
-  console.log(`IMA pointer sync
+  console.log(`IMA local raw sync
 
 Usage:
   npm run wiki:sync-ima
-  npm run wiki:sync-ima -- --kb "Agent应用与开发"
+  npm run wiki:sync-ima -- --kb "Agent applications"
   npm run wiki:sync-ima -- --all-kbs --dry-run
   npm run wiki:sync-ima -- --max-items 100
 
 Options:
   --kb <name>          Sync only knowledge bases whose names include this text.
   --all-kbs           Sync every visible knowledge base. This is the default.
-  --dry-run           List planned changes without writing files.
+  --dry-run           List planned imports without writing files or fetching originals.
   --max-items <n>     Stop after discovering n non-folder items.
   --delay-ms <n>      Delay between IMA API calls. Defaults to 750.
   --summary           Print counts only instead of every planned file.
+  --no-images         Do not run the image mirroring workflow after text import.
   --base-url <url>    IMA OpenAPI base URL. Defaults to https://ima.qq.com.
+
+Default behavior is local-first: each imported IMA item becomes a normal
+raw/ima/*.md source note with status: inbox. Text content is stored in Capture,
+binary originals are mirrored under raw/snapshots/ima/, and image items are
+mirrored under raw/assets/.
 `);
 }
 
@@ -38,10 +54,11 @@ function readOption(name) {
 const dryRun = args.includes("--dry-run");
 const help = args.includes("--help") || args.includes("-h");
 const summaryOnly = args.includes("--summary");
+const shouldMirrorImages = !args.includes("--no-images");
 const kbFilter = readOption("--kb");
 const maxItems = Number(readOption("--max-items") || 0);
 const delayMs = Number(readOption("--delay-ms") || 750);
-const baseUrl = (readOption("--base-url") || process.env.IMA_OPENAPI_BASE_URL || defaultBaseUrl).replace(/\/+$/, "");
+const baseUrl = readOption("--base-url") || process.env.IMA_OPENAPI_BASE_URL || defaultImaBaseUrl;
 
 if (help) {
   usage();
@@ -51,71 +68,6 @@ if (help) {
 function fail(message, code = 1) {
   console.error(message);
   process.exit(code);
-}
-
-async function credentials() {
-  const clientId = process.env.IMA_OPENAPI_CLIENTID || await readConfigSecret("client_id");
-  const apiKey = process.env.IMA_OPENAPI_APIKEY || await readConfigSecret("api_key");
-  if (!clientId || !apiKey) {
-    fail("Missing IMA credentials. Set IMA_OPENAPI_CLIENTID/IMA_OPENAPI_APIKEY or ~/.config/ima/client_id and ~/.config/ima/api_key.");
-  }
-  return { clientId: clientId.trim(), apiKey: apiKey.trim() };
-}
-
-async function readConfigSecret(name) {
-  const target = path.join(os.homedir(), ".config", "ima", name);
-  try {
-    return (await fs.readFile(target, "utf8")).trim();
-  } catch {
-    return "";
-  }
-}
-
-async function callIma(auth, apiPath, body) {
-  const attempts = [0, 3000, 8000, 15000, 30000];
-  let lastError = "";
-  for (let attempt = 0; attempt < attempts.length; attempt += 1) {
-    if (attempts[attempt]) await sleep(attempts[attempt]);
-    if (delayMs > 0) await sleep(delayMs);
-    const response = await fetch(`${baseUrl}/${apiPath}`, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "ima-openapi-clientid": auth.clientId,
-        "ima-openapi-apikey": auth.apiKey
-      },
-      body: JSON.stringify(body)
-    });
-    const text = await response.text();
-    const data = safeJson(text);
-    const message = data?.msg || text.slice(0, 200);
-    const limited = response.status === 403 && /频率|rate|limit/i.test(message);
-    if (!response.ok) {
-      lastError = `IMA HTTP error ${response.status}: ${message}`;
-      if (limited && attempt < attempts.length - 1) continue;
-      fail(lastError);
-    }
-    if (!data) fail(`IMA API returned non-JSON output for ${apiPath}.`);
-    if (data.code !== 0) {
-      lastError = `IMA API business error: ${data.msg || `code ${data.code}`}`;
-      if (/频率|rate|limit/i.test(String(data.msg || "")) && attempt < attempts.length - 1) continue;
-      fail(lastError);
-    }
-    return data.data || {};
-  }
-  fail(lastError || "IMA API call failed after retries.");
-}
-
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function safeJson(value) {
-  try {
-    return JSON.parse(String(value || "").trim());
-  } catch {
-    return null;
-  }
 }
 
 function kbId(kb) {
@@ -140,11 +92,11 @@ async function existingMediaIds() {
   return ids;
 }
 
-async function listKnowledgeBases(auth) {
+async function listKnowledgeBases(client) {
   const bases = [];
   let cursor = "";
   do {
-    const data = await callIma(auth, "openapi/wiki/v1/search_knowledge_base", {
+    const data = await client.call("openapi/wiki/v1/search_knowledge_base", {
       query: kbFilter || "",
       cursor,
       limit: 20
@@ -163,28 +115,7 @@ function isFolder(entry) {
     Number.isFinite(Number(entry.file_number));
 }
 
-function mediaTypeLabel(value) {
-  const labels = new Map([
-    [1, "PDF"],
-    [2, "WEBPAGE"],
-    [3, "WORD"],
-    [4, "PPT"],
-    [5, "EXCEL"],
-    [6, "WECHAT_ARTICLE"],
-    [7, "MARKDOWN"],
-    [9, "IMAGE"],
-    [11, "NOTE"],
-    [12, "AI_SESSION"],
-    [13, "TXT"],
-    [14, "XMIND"],
-    [15, "AUDIO"],
-    [16, "VIDEO_PARSE"]
-  ]);
-  const numeric = Number(value);
-  return labels.get(numeric) || String(value || "UNKNOWN");
-}
-
-async function listFolder(auth, kb, folder) {
+async function listFolder(client, kb, folder) {
   const items = [];
   let cursor = "";
   do {
@@ -194,14 +125,14 @@ async function listFolder(auth, kb, folder) {
       limit: 50
     };
     if (folder?.id) body.folder_id = folder.id;
-    const data = await callIma(auth, "openapi/wiki/v1/get_knowledge_list", body);
+    const data = await client.call("openapi/wiki/v1/get_knowledge_list", body);
     items.push(...(data.knowledge_list || []));
     cursor = data.is_end ? "" : data.next_cursor || "";
   } while (cursor);
   return items;
 }
 
-async function collectItems(auth, kb) {
+async function collectItems(client, kb) {
   const seenFolders = new Set();
   const queue = [{ id: "", name: "", path: "" }];
   const docs = [];
@@ -212,7 +143,7 @@ async function collectItems(auth, kb) {
     if (seenFolders.has(folderKey)) continue;
     seenFolders.add(folderKey);
 
-    const items = await listFolder(auth, kb, folder);
+    const items = await listFolder(client, kb, folder);
     for (const item of items) {
       if (isFolder(item)) {
         const folderId = item.folder_id || item.media_id;
@@ -253,69 +184,13 @@ async function uniqueFilePath(title, mediaId) {
   }
 }
 
-function pointerMarkdown(kb, item) {
-  const title = item.title || item.name || item.media_id;
-  const mediaType = mediaTypeLabel(item.media_type);
-  const folderName = item.folder_path || item.folder_name || "";
-  return `---
-title: ${yamlString(title)}
-type: raw-source
-source_type: ima-reference
-status: ima-pointer
-author:
-published:
-captured: ${yamlString(new Date().toISOString().slice(0, 10))}
-source_url:
-ima_source:
-  knowledge_base_id: ${yamlString(kbId(kb))}
-  knowledge_base_name: ${yamlString(kbName(kb))}
-  folder_id: ${yamlString(item.folder_id || "")}
-  folder_name: ${yamlString(folderName)}
-  media_id: ${yamlString(item.media_id)}
-  media_type: ${yamlString(mediaType)}
-tags:
-  - raw
-  - ima-reference
-related:
----
-
-# ${title}
-
-> **IMA 指针条目**：原文档存放在 IMA 知识库，本地仅保留元数据和引用。查询原文请通过 \`ima-mcp\` 的 \`fetch_media_content\` 工具，或 IMA OpenAPI 的 \`get_media_info\` 获取。
-
-## IMA Source
-
-- **知识库**: ${kbName(kb)}
-- **文件夹**: ${folderName || "根目录"}
-- **Media 类型**: ${mediaType}
-- **可获取原文**: 通过 IMA connector / OpenAPI 获取
-
-## 摘要
-
-待提取。此条目目前只表示 IMA 原文已进入本地维护索引，完整内容仍保留在 IMA。
-
-## 提取的关键概念
-
--
-
-## 对应 Wiki 页面
-
--
-
-## 处理记录
-
-- Status: ima-pointer
-- 本条目不存储原文，原文在 IMA 知识库中
-- 后续维护时获取原文，提取关键概念，再更新对应 wiki 页面
-`;
-}
-
 async function main() {
-  const auth = await credentials();
+  const auth = await readImaCredentials();
+  const client = createImaClient({ auth, baseUrl, delayMs });
   const knownIds = await existingMediaIds();
   await fs.mkdir(rawImaDir, { recursive: true });
 
-  const bases = await listKnowledgeBases(auth);
+  const bases = await listKnowledgeBases(client);
   const selected = kbFilter
     ? bases.filter((kb) => String(kbName(kb) || "").includes(kbFilter))
     : bases;
@@ -324,24 +199,47 @@ async function main() {
     fail(kbFilter ? `No IMA knowledge bases matched "${kbFilter}".` : "No IMA knowledge bases returned.");
   }
 
+  const planned = [];
   const written = [];
+  const errors = [];
+  const imageRuns = [];
   let discovered = 0;
   let skipped = 0;
 
   for (const kb of selected) {
-    const docs = await collectItems(auth, kb);
+    const docs = await collectItems(client, kb);
     discovered += docs.length;
     for (const item of docs) {
+      const title = item.title || item.name || item.media_id;
       if (knownIds.has(item.media_id)) {
         skipped += 1;
         continue;
       }
-      const target = await uniqueFilePath(item.title || item.name || item.media_id, item.media_id);
+      const target = await uniqueFilePath(title, item.media_id);
       const relative = path.relative(vault, target).replace(/\\/g, "/");
-      written.push({ kb: kbName(kb), title: item.title || item.name || item.media_id, path: relative });
-      if (!dryRun) {
-        await fs.writeFile(target, pointerMarkdown(kb, item), "utf8");
+      const plan = {
+        kb: kbName(kb),
+        title,
+        mediaId: item.media_id,
+        mediaType: mediaTypeLabel(item.media_type),
+        path: relative
+      };
+      planned.push(plan);
+      if (dryRun) continue;
+
+      try {
+        const original = await fetchImaOriginal(client, item.media_id);
+        const materialized = await materializeOriginal({ vault, notePath: target, title, original });
+        await fs.writeFile(target, rawImaMarkdown({ kb, item, target, original, materialized }), "utf8");
         knownIds.add(item.media_id);
+        written.push({ ...plan, snapshot: materialized.snapshotPath, localFiles: materialized.localFiles });
+        await logImaImport(relative, `media_id="${item.media_id}"`);
+
+        if (shouldMirrorImages && hasImageReferences(original.content || "")) {
+          imageRuns.push({ source: relative, result: runImageAssets({ source: relative, enabled: true }) });
+        }
+      } catch (error) {
+        errors.push({ ...plan, error: error.message });
       }
     }
     if (maxItems > 0 && discovered >= maxItems) break;
@@ -351,11 +249,17 @@ async function main() {
     knowledgeBases: selected.length,
     discovered,
     skippedExisting: skipped,
-    createdPointers: written.length,
+    plannedImports: planned.length,
+    createdRaw: written.length,
+    imageMirroringRuns: imageRuns.length,
+    errors,
     dryRun,
-    files: summaryOnly ? undefined : written,
-    sampleFiles: summaryOnly ? written.slice(0, 20) : undefined
+    files: summaryOnly ? undefined : (dryRun ? planned : written),
+    sampleFiles: summaryOnly ? (dryRun ? planned : written).slice(0, 20) : undefined,
+    imageRuns: summaryOnly ? undefined : imageRuns
   }, null, 2));
+
+  if (errors.length > 0) process.exitCode = 1;
 }
 
 main().catch((error) => {

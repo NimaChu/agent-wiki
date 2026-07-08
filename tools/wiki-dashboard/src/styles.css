@@ -836,11 +836,12 @@ h3 {
   overflow-wrap: anywhere;
 }
 
-.group-label-layer {
+.group-shell-layer,
+.group-name-layer {
   pointer-events: none;
 }
 
-.group-label-layer.is-enterable-layer {
+.group-shell-layer.is-enterable-layer {
   pointer-events: all;
 }
 
@@ -853,7 +854,7 @@ h3 {
   pointer-events: visiblePainted;
 }
 
-.group-label-layer rect {
+.group-name-layer rect {
   fill: rgba(21, 23, 24, 0.76);
   stroke-width: 1.1;
 }
@@ -874,7 +875,7 @@ h3 {
   stroke-opacity: 0.14;
 }
 
-.group-label-layer text {
+.group-name-layer text {
   fill: #dfe5e4;
   font-size: 11px;
   font-weight: 650;

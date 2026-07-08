@@ -39,8 +39,8 @@ Usage:
   node scripts/karpathy-wiki.mjs capture --title "Title" --url "https://..." --refresh-dashboard
   node scripts/karpathy-wiki.mjs capture --title "Title" --url "https://..." --serve-dashboard
   node scripts/karpathy-wiki.mjs search "query terms"
-  node scripts/karpathy-wiki.mjs sync-ima [--kb "Knowledge base name"]
-  node scripts/karpathy-wiki.mjs fetch-ima raw/ima/source.md [--metadata]
+  node scripts/karpathy-wiki.mjs sync-ima [--kb "Knowledge base name"] [--no-images]
+  node scripts/karpathy-wiki.mjs fetch-ima raw/ima/source.md [--metadata|--force]
   node scripts/karpathy-wiki.mjs garden
   node scripts/karpathy-wiki.mjs repair-links
   node scripts/karpathy-wiki.mjs distill-query --title "Durable answer" --summary-file /tmp/answer.md --source raw/...

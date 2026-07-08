@@ -8,6 +8,7 @@ type WikiNode = {
   title: string;
   type: string;
   group?: string;
+  universes?: string[];
   status: string;
   tags: string[];
   content?: string;
@@ -155,14 +156,14 @@ function App() {
   const filterOptions = useMemo(() => {
     const nodes = (graph?.nodes ?? []).filter((node) => node.id.startsWith("wiki/"));
     return {
-      groups: unique(nodes.map((node) => node.group ?? inferFallbackGroup(node)))
+      groups: unique(nodes.flatMap((node) => nodeUniverses(node)))
     };
   }, [graph]);
   const selectedGroupSet = useMemo(() => new Set(filters.groups), [filters.groups]);
   const groupPickerLabel = useMemo(() => {
-    if (filters.groups.length === 0) return "All groups";
+    if (filters.groups.length === 0) return "All universes";
     if (filters.groups.length === 1) return groupLabelText(filters.groups[0]);
-    return `${filters.groups.length} groups`;
+    return `${filters.groups.length} universes`;
   }, [filters.groups]);
   const wikiFilteredNodes = useMemo(() => {
     if (!graph) return [];
@@ -171,9 +172,9 @@ function App() {
     return graph.nodes.filter((node) => {
       if (!node.id.startsWith("wiki/")) return false;
       if (!hasSearch) return true;
-      const group = node.group ?? inferFallbackGroup(node);
-      const searchable = [node.title, node.path, node.type, node.status, group, ...node.tags].join(" ").toLowerCase();
-      return searchable.includes(needle) && (filters.groups.length === 0 || filters.groups.includes(group));
+      const universes = nodeUniverses(node);
+      const searchable = [node.title, node.path, node.type, node.status, ...universes, ...node.tags].join(" ").toLowerCase();
+      return searchable.includes(needle) && (filters.groups.length === 0 || universes.some((universe) => filters.groups.includes(universe)));
     });
   }, [graph, filters]);
 
@@ -192,7 +193,7 @@ function App() {
   const baseFilteredNodes = useMemo(() => {
     if (!graph) return [];
     if (graphMode === "evidence") return graph.nodes.filter((node) => evidenceNodeIds.has(node.id));
-    if (focusedGroup && graphScope === "global") return wikiFilteredNodes.filter((node) => (node.group ?? inferFallbackGroup(node)) === focusedGroup);
+    if (focusedGroup && graphScope === "global") return wikiFilteredNodes.filter((node) => nodeUniverses(node).includes(focusedGroup));
     return wikiFilteredNodes;
   }, [evidenceNodeIds, focusedGroup, graph, graphMode, graphScope, wikiFilteredNodes]);
 
@@ -338,7 +339,7 @@ function App() {
 
   const isUniverseOverview = graphMode === "knowledge" && graphScope === "global" && !focusedGroup;
   const canNavigateBack = graphMode === "evidence" || Boolean(focusedGroup) || graphScope === "local";
-  const layerTitle = graphMode === "evidence" && evidenceCenter ? `Evidence: ${evidenceCenter.title}` : focusedGroup ? groupLabelText(focusedGroup) : graphScope === "local" ? "Neighbors" : "All Groups";
+  const layerTitle = graphMode === "evidence" && evidenceCenter ? `Evidence: ${evidenceCenter.title}` : focusedGroup ? groupLabelText(focusedGroup) : graphScope === "local" ? "Neighbors" : "All Universes";
 
   const navigateBack = () => {
     if (graphMode === "evidence") {
@@ -417,12 +418,12 @@ function App() {
             </span>
           </label>
           <div className="top-filter">
-            <span>Group</span>
+            <span>Universe</span>
             <details className="group-picker">
               <summary>{groupPickerLabel}</summary>
               <div className="group-picker-menu">
                 <button type="button" className="group-picker-clear" onClick={() => setFilters({ ...filters, groups: [] })}>
-                  All groups
+                  All universes
                 </button>
                 {filterOptions.groups.map((group) => (
                   <label key={group} className="group-picker-option">
@@ -598,10 +599,9 @@ function GraphView({
     }, 0);
   };
 
-  const groupLayer = (
-    <g className={`group-label-layer ${canEnterGroup ? "is-enterable-layer" : ""}`}>
+  const groupShellLayer = (
+    <g className={`group-shell-layer ${canEnterGroup ? "is-enterable-layer" : ""}`}>
       {groupLabels.map((label) => {
-        const width = Math.min(250, Math.max(92, label.label.length * 6.2 + 28));
         return (
           <g
             key={label.group}
@@ -619,11 +619,24 @@ function GraphView({
             }}
           >
             <circle className="universe-glow" r={label.radius * 1.1} fill={label.color} />
-            <ellipse className="group-shell" rx={label.radius} ry={label.radius * 0.72} stroke={label.color} />
-            <ellipse className="group-shell is-meridian" rx={label.radius * 0.32} ry={label.radius * 0.72} stroke={label.color} />
-            <ellipse className="group-shell is-equator" rx={label.radius} ry={label.radius * 0.18} stroke={label.color} />
-            <rect x={-width / 2} y={-label.radius * 0.72 - 38} width={width} height={26} rx={13} stroke={label.color} />
-            <text y={-label.radius * 0.72 - 25}>{label.label}</text>
+            <circle className="group-shell" r={label.radius} stroke={label.color} />
+            <ellipse className="group-shell is-meridian" rx={label.radius * 0.36} ry={label.radius} stroke={label.color} />
+            <ellipse className="group-shell is-equator" rx={label.radius} ry={label.radius * 0.28} stroke={label.color} />
+          </g>
+        );
+      })}
+    </g>
+  );
+
+  const groupNameLayer = (
+    <g className="group-name-layer">
+      {groupLabels.map((label) => {
+        const width = Math.min(250, Math.max(92, label.label.length * 6.2 + 28));
+        const y = label.y - label.radius - 28;
+        return (
+          <g key={label.group} transform={`translate(${label.x}, ${y})`} pointerEvents="none">
+            <rect x={-width / 2} y={-13} width={width} height={26} rx={13} stroke={label.color} />
+            <text>{label.label}</text>
           </g>
         );
       })}
@@ -653,7 +666,7 @@ function GraphView({
           <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
         </radialGradient>
       </defs>
-      {canEnterGroup && groupLayer}
+      {canEnterGroup && groupShellLayer}
       <g className="edge-layer">
         {edges.map((edge) => {
           const source = layoutById.get(edge.source);
@@ -724,6 +737,7 @@ function GraphView({
           );
         })}
       </g>
+      {canEnterGroup && groupNameLayer}
     </svg>
   );
 }
@@ -770,7 +784,7 @@ function NodeInspector({
 
     if (focusedGroup) {
       return (
-        <GroupOverview
+        <UniverseOverview
           graph={graph}
           group={focusedGroup}
           visibleNodes={visibleNodes}
@@ -810,7 +824,7 @@ function NodeInspector({
 
         <dl className="wiki-meta-grid">
           <div><dt>Status</dt><dd>{node.status}</dd></div>
-          <div><dt>Group</dt><dd>{node.group ?? inferFallbackGroup(node)}</dd></div>
+          <div><dt>Universe</dt><dd>{universeListText(node)}</dd></div>
           <div><dt>Type</dt><dd>{node.type}</dd></div>
           <div><dt>Links</dt><dd>{node.out.length}</dd></div>
           <div><dt>Backlinks</dt><dd>{node.backlinks.length}</dd></div>
@@ -839,7 +853,7 @@ function NodeInspector({
             neighbors.slice(0, 18).map((neighbor) => (
               <button key={neighbor.id} onClick={() => onSelect(neighbor.id)}>
                 <strong>{neighbor.title}</strong>
-                <span>{neighbor.group ?? inferFallbackGroup(neighbor)} / {neighbor.status}</span>
+                <span>{primaryUniverseLabel(neighbor)} / {neighbor.status}</span>
               </button>
             ))
           )}
@@ -863,7 +877,7 @@ function NodeInspector({
 
       <dl className="node-metrics">
         <div><dt>Status</dt><dd>{node.status}</dd></div>
-        <div><dt>Group</dt><dd>{node.group ?? inferFallbackGroup(node)}</dd></div>
+        <div><dt>Universe</dt><dd>{universeListText(node)}</dd></div>
         <div><dt>Type</dt><dd>{node.type}</dd></div>
         <div><dt>Links</dt><dd>{node.out.length}</dd></div>
         <div><dt>Backlinks</dt><dd>{node.backlinks.length}</dd></div>
@@ -890,7 +904,7 @@ function NodeInspector({
             neighbors.slice(0, 18).map((neighbor) => (
               <button key={neighbor.id} onClick={() => onSelect(neighbor.id)}>
                 <strong>{neighbor.title}</strong>
-                <span>{neighbor.group ?? inferFallbackGroup(neighbor)} / {neighbor.status}</span>
+                <span>{primaryUniverseLabel(neighbor)} / {neighbor.status}</span>
               </button>
             ))
         )}
@@ -899,7 +913,7 @@ function NodeInspector({
   );
 }
 
-function GroupOverview({
+function UniverseOverview({
   graph,
   group,
   visibleNodes,
@@ -912,11 +926,11 @@ function GroupOverview({
   visibleEdges: number;
   onSelect: (id: string) => void;
 }) {
-  const summary = useMemo(() => buildGroupSummary(graph, group), [graph, group]);
+  const summary = useMemo(() => buildUniverseSummary(graph, group), [graph, group]);
   return (
     <section className="group-overview">
       <header>
-        <span className="panel-kicker">Group</span>
+        <span className="panel-kicker">Universe</span>
         <h2>{groupLabelText(group)}</h2>
         <p>{summary.wikiNodes.length} wiki pages, {summary.evidenceCount} raw evidence notes</p>
       </header>
@@ -1151,8 +1165,8 @@ function QueueSummary({ graph, nodeById, onSelect }: { graph: WikiGraph; nodeByI
   );
 }
 
-function buildGroupSummary(graph: WikiGraph, group: string) {
-  const wikiNodes = graph.nodes.filter((node) => node.id.startsWith("wiki/") && (node.group ?? inferFallbackGroup(node)) === group);
+function buildUniverseSummary(graph: WikiGraph, group: string) {
+  const wikiNodes = graph.nodes.filter((node) => node.id.startsWith("wiki/") && nodeUniverses(node).includes(group));
   const wikiIds = new Set(wikiNodes.map((node) => node.id));
   const evidenceIds = new Set<string>();
   const statusCounts = new Map<string, number>();
@@ -1201,13 +1215,13 @@ function buildLayout(
   const degree = new Map(nodes.map((node) => [node.id, node.out.length + node.backlinks.length]));
   if (!isLocal && nodes.every((node) => node.id.startsWith("wiki/"))) return buildWikiSphereLayout(nodes, degree, rotation);
   if (!isLocal && nodes.length > 450) return buildLargeGraphLayout(nodes, degree);
-  const groups = unique(nodes.map((node) => node.group ?? inferFallbackGroup(node)));
+  const groups = unique(nodes.map((node) => primaryUniverse(node)));
   const groupIndex = new Map(groups.map((group, index) => [group, index]));
   const localGroupIndex = new Map<string, number>();
   const points: SimNode[] = nodes.map((node, index) => {
     const angle = index * 2.399963229728653;
     const section = node.id.split("/")[0];
-    const group = node.group ?? inferFallbackGroup(node);
+    const group = primaryUniverse(node);
     const localIndex = localGroupIndex.get(group) ?? 0;
     localGroupIndex.set(group, localIndex + 1);
     const radius =
@@ -1237,7 +1251,7 @@ function buildLayout(
         const b = points[j];
         const dx = a.x - b.x;
         const dy = a.y - b.y;
-        const sameGroup = (a.group ?? inferFallbackGroup(a)) === (b.group ?? inferFallbackGroup(b));
+        const sameGroup = primaryUniverse(a) === primaryUniverse(b);
         const dist2 = Math.max(dx * dx + dy * dy, isLocal ? 90 : sameGroup ? 42 : 120);
         const force = ((isLocal ? 430 : sameGroup ? 150 : 360) * alpha) / dist2;
         const fx = dx * force;
@@ -1299,7 +1313,7 @@ function buildLayout(
 function buildWikiSphereLayout(nodes: WikiNode[], degree: Map<string, number>, rotation: { x: number; y: number }): LayoutNode[] {
   const groupBuckets = new Map<string, WikiNode[]>();
   for (const node of nodes) {
-    const group = node.group ?? inferFallbackGroup(node);
+    const group = primaryUniverse(node);
     groupBuckets.set(group, [...(groupBuckets.get(group) ?? []), node]);
   }
 
@@ -1408,7 +1422,7 @@ function fibonacciSpherePoint(index: number, count: number) {
 function buildLargeGraphLayout(nodes: WikiNode[], degree: Map<string, number>): LayoutNode[] {
   const groupBuckets = new Map<string, WikiNode[]>();
   for (const node of nodes) {
-    const group = node.group ?? inferFallbackGroup(node);
+    const group = primaryUniverse(node);
     groupBuckets.set(group, [...(groupBuckets.get(group) ?? []), node]);
   }
 
@@ -1447,7 +1461,7 @@ function buildLargeGraphLayout(nodes: WikiNode[], degree: Map<string, number>): 
   groupCenters.set("Wiki / AI", { x: viewBox.width / 2 + 115, y: viewBox.height / 2 });
 
   return nodes.map((node) => {
-    const group = node.group ?? inferFallbackGroup(node);
+    const group = primaryUniverse(node);
     const bucket = groupBuckets.get(group) ?? [node];
     const index = bucket.findIndex((candidate) => candidate.id === node.id);
     const safeIndex = Math.max(index, 0);
@@ -1529,7 +1543,7 @@ function isDefaultLocalCandidate(node: WikiNode) {
 function clusterTarget(node: WikiNode, groupIndex = new Map<string, number>(), totalGroups = 1) {
   const section = node.id.split("/")[0];
   if (section === "wiki") return { x: viewBox.width * 0.5, y: viewBox.height * 0.5 };
-  if (section === "raw") return groupedTarget(node.group ?? inferFallbackGroup(node), groupIndex, totalGroups);
+  if (section === "raw") return groupedTarget(primaryUniverse(node), groupIndex, totalGroups);
   return { x: viewBox.width / 2, y: viewBox.height / 2 };
 }
 
@@ -1556,7 +1570,7 @@ function nodeDegree(node: WikiNode) {
 }
 
 function nodeFill(node: WikiNode) {
-  const group = node.group ?? inferFallbackGroup(node);
+  const group = primaryUniverse(node);
   if (node.id.startsWith("raw/")) return colorForGroup(group);
   if (node.id.startsWith("wiki/")) return colorForDegree(nodeDegree(node));
   return "#aeb7bd";
@@ -1592,7 +1606,7 @@ function DegreeLegend() {
 function buildGroupLabels(layout: LayoutNode[]): GroupLabel[] {
   const buckets = new Map<string, LayoutNode[]>();
   for (const node of layout) {
-    const group = node.group ?? inferFallbackGroup(node);
+    const group = primaryUniverse(node);
     buckets.set(group, [...(buckets.get(group) ?? []), node]);
   }
 
@@ -1634,6 +1648,22 @@ function groupLabelText(group: string) {
   };
   const label = wikiLabels[group] ?? group.replace(/^Wiki \/ /, "").replace(/^FlexSim \/ /, "");
   return label.length > 34 ? `${label.slice(0, 32)}...` : label;
+}
+
+function primaryUniverse(node: WikiNode) {
+  return node.group ?? node.universes?.[0] ?? inferFallbackGroup(node);
+}
+
+function nodeUniverses(node: WikiNode) {
+  return unique([primaryUniverse(node), ...(node.universes ?? [])].filter(Boolean));
+}
+
+function primaryUniverseLabel(node: WikiNode) {
+  return groupLabelText(primaryUniverse(node));
+}
+
+function universeListText(node: WikiNode) {
+  return nodeUniverses(node).map(groupLabelText).join(", ");
 }
 
 function groupedTarget(group: string, groupIndex: Map<string, number>, totalGroups: number) {

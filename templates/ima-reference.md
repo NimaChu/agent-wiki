@@ -1,12 +1,19 @@
 ---
 title: "{{title}}"
 type: raw-source
-source_type: ima-reference
-status: ima-pointer
+source_type: ima
+status: inbox
 author:
 published:
 captured: {{date}}
 source_url:
+snapshot_path:
+image_index_path:
+image_count:
+mirrored_image_count:
+content_hash:
+capture_method: ima-openapi
+source_quality: imported
 ima_source:
   knowledge_base_id: "{{knowledge_base_id}}"
   knowledge_base_name: "{{knowledge_base_name}}"
@@ -14,38 +21,55 @@ ima_source:
   folder_name: "{{folder_name}}"
   media_id: "{{media_id}}"
   media_type: "{{media_type}}"
+  content_type: "{{content_type}}"
 tags:
   - raw
-  - ima-reference
+  - ima
+  - external
 related:
 ---
 
 # {{title}}
 
-> **IMA 指针条目**：原文档存放在 IMA 知识库，本地仅保留元数据和引用。查询原文请通过 IMA connector / OpenAPI，或 `npm run wiki:fetch-ima -- raw/ima/source-note.md` 获取。
+## Source
+
+- Origin: IMA
+- Knowledge base: {{knowledge_base_name}}
+- Folder: {{folder_name}}
+- Media ID: {{media_id}}
+- Media type: {{media_type}}
+- URL: {{source_url}}
+- Captured: {{date}}
+- Snapshot: {{snapshot_path}}
 
 ## IMA Source
 
-- **知识库**: {{knowledge_base_name}}
-- **文件夹**: {{folder_name}}
-- **Media 类型**: {{media_type}}
-- **可获取原文**: 通过 IMA connector / OpenAPI 获取
+- Knowledge base ID: {{knowledge_base_id}}
+- Knowledge base name: {{knowledge_base_name}}
+- Folder ID: {{folder_id}}
+- Folder name: {{folder_name}}
+- Media ID: {{media_id}}
+- Media type: {{media_type}}
+- Content type: {{content_type}}
 
-## 摘要
+## Capture
 
-{{introduction}}
+{{content}}
 
-## 提取的关键概念
+## Images
+
+- Inline Markdown/HTML images are preserved in Capture. Run `npm run wiki:images -- --source raw/ima/source-note.md` when image references are present.
+
+## Extracted Claims
 
 - 
 
-## 对应 Wiki 页面
+## Candidate Wiki Links
 
 - 
 
-## 处理记录
+## Processing Notes
 
-- Status: ima-pointer
-- 本条目不存储原文，原文在 IMA 知识库中
-- 后续维护时获取原文，提取关键概念，再更新对应 wiki 页面
-- 完成 wiki 反链闭环后，将本条目改为 `processed`
+- Status: inbox
+- Imported locally from IMA; do not depend on the external platform during routine maintenance or query.
+- Next action: compile durable ideas into wiki pages, close core related links, then mark processed.

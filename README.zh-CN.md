@@ -193,16 +193,18 @@ https://mcp.firecrawl.dev/v2/mcp
 
 ## 可选：IMA 桥接
 
-Agent Wiki 也可以和 IMA 知识库做轻量桥接。
+Agent Wiki 也可以把 IMA 知识库里的资料导入成本地 raw。
 
-这个功能是可选的，需要用户明确确认并配置 IMA OpenAPI 凭证。默认机制不是把 IMA 原文复制到本地，而是在 `raw/ima/` 里保存轻量指针，维护时临时获取原文、提取概念、更新 `wiki/`，然后把指针状态改成 `processed`。
+这个功能是可选的，需要用户明确确认并配置 IMA OpenAPI 凭证，也需要确认这些资料可以保存到本地。默认机制是 local-first：`wiki:sync-ima` 会把选中的 IMA 条目下载到 `raw/ima/`，生成普通的 `status: inbox` 源笔记。文本会写入 `## Capture`，二进制原文件会保存到 `raw/snapshots/ima/`，图片或富图片内容会尽量进入 `raw/assets/` 和图片索引。
 
 ```bash
 npm run wiki:sync-ima
 npm run wiki:fetch-ima -- raw/ima/source-note.md --metadata
 ```
 
-`ima-pointer` 和普通 `inbox` 一样都表示“还没处理完”。区别只是：普通 raw 的原文在本地，IMA raw 的原文在 IMA。
+导入后的 IMA raw 和普通 `inbox` 一样维护：让 agent 提炼 durable wiki 页面、补好 raw/wiki 证据链接，最后再标记为 `processed`。旧版本留下的 `ima-pointer` 只作为 legacy 格式存在，需要先用 `npm run wiki:fetch-ima -- raw/ima/source-note.md` 拉成本地 inbox，再走常规维护流程。
+
+详细 agent 流程见：`docs/ima-local-import.md`。
 
 ## 常用命令
 

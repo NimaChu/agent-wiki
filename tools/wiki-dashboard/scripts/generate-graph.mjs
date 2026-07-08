@@ -157,6 +157,13 @@ function inferGroup(id, frontmatter) {
   return id.split("/")[0] || "Other";
 }
 
+function inferUniverses(id, frontmatter, primaryGroup) {
+  const explicit = [...asArray(frontmatter.universes), ...asArray(frontmatter.universe)]
+    .map((item) => String(item).trim())
+    .filter(Boolean);
+  return Array.from(new Set([primaryGroup, ...explicit]));
+}
+
 function inferWikiGroup(title, tags = []) {
   const label = `${title} ${tags.join(" ")}`.toLowerCase();
   if (/flexsim/i.test(label)) return "Wiki / FlexSim";
@@ -222,12 +229,14 @@ async function main() {
       const content = await fs.readFile(filePath, "utf8");
       const frontmatter = parseFrontmatter(content);
       const id = relativeId(filePath);
+      const group = inferGroup(id, frontmatter);
       return {
         id,
         path: id + ".md",
         title: titleFromFrontmatter(frontmatter, id),
         type: inferType(id, frontmatter),
-        group: inferGroup(id, frontmatter),
+        group,
+        universes: inferUniverses(id, frontmatter, group),
         status: String(frontmatter.status || "unknown"),
         tags: asArray(frontmatter.tags),
         content: wikiContentForGraph(id, content),

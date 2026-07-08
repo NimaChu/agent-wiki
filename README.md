@@ -141,16 +141,18 @@ Use Firecrawl as a capture helper, not as the source of truth:
 
 ## IMA Bridge, Optional
 
-Agent Wiki can also keep lightweight pointers to external IMA knowledge base items.
+Agent Wiki can also import external IMA knowledge base items into local raw notes.
 
-This is optional and requires user-confirmed IMA OpenAPI credentials. The local vault stores only pointer metadata and extracted wiki concepts by default. Full IMA originals stay in IMA.
+This is optional and requires user-confirmed IMA OpenAPI credentials plus permission to store the selected content locally. The default is now local-first: `wiki:sync-ima` downloads each selected IMA item into `raw/ima/` as a normal `status: inbox` source note. Text goes into `## Capture`, binary originals are mirrored under `raw/snapshots/ima/`, and image-rich notes can be indexed under `raw/assets/`.
 
 ```bash
 npm run wiki:sync-ima
 npm run wiki:fetch-ima -- raw/ima/source-note.md --metadata
 ```
 
-Maintenance treats `ima-pointer` as pending raw work. The agent fetches the original temporarily, extracts durable concepts into `wiki/`, adds a `## IMA Sources` backlink, and then marks the pointer `processed`.
+Maintenance treats imported IMA notes like any other inbox raw source: distill durable concepts into `wiki/`, close backlinks to the raw evidence, then mark the raw note `processed`. Older `ima-pointer` notes are legacy records; run `npm run wiki:fetch-ima -- raw/ima/source-note.md` to upgrade one into a local inbox raw note before normal maintenance.
+
+Detailed agent workflow: `docs/ima-local-import.md`.
 
 ## Commands
 

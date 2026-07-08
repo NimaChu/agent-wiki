@@ -1,26 +1,59 @@
 #!/usr/bin/env node
 import { promises as fs } from "node:fs";
-import os from "node:os";
 import path from "node:path";
-import { exists, vaultPath } from "./wiki-lib.mjs";
+import {
+  exists,
+  parseFrontmatter,
+  vaultPath
+} from "./wiki-lib.mjs";
+import {
+  createImaClient,
+  defaultImaBaseUrl,
+  extractMediaId,
+  fetchImaOriginal,
+  hasImageReferences,
+  hasSubstantialCapture,
+  logImaImport,
+  materializeOriginal,
+  readImaCredentials,
+  replaceSection,
+  runImageAssets,
+  upsertFrontmatter
+} from "./ima-local-lib.mjs";
 
 const vault = vaultPath();
 const args = process.argv.slice(2);
 const rawArg = args.find((arg) => !arg.startsWith("--"));
 const metadataOnly = args.includes("--metadata");
+const stdoutOnly = args.includes("--stdout");
+const force = args.includes("--force");
+const shouldMirrorImages = !args.includes("--no-images");
 const outputPath = readOption("--output");
-const baseUrl = (readOption("--base-url") || process.env.IMA_OPENAPI_BASE_URL || "https://ima.qq.com").replace(/\/+$/, "");
+const baseUrl = readOption("--base-url") || process.env.IMA_OPENAPI_BASE_URL || defaultImaBaseUrl;
+const delayMs = Number(readOption("--delay-ms") || 750);
 
 function usage() {
-  console.log(`IMA pointer content fetch
+  console.log(`IMA local raw fetch
 
 Usage:
   npm run wiki:fetch-ima -- raw/ima/source.md
   npm run wiki:fetch-ima -- raw/ima/source.md --metadata
+  npm run wiki:fetch-ima -- raw/ima/source.md --force
+  npm run wiki:fetch-ima -- raw/ima/source.md --stdout
   npm run wiki:fetch-ima -- raw/ima/source.md --output /tmp/source.md
 
-This reads the IMA original for maintenance and writes it to stdout by default.
-It does not store full IMA originals in the vault.
+Default behavior upgrades or refreshes one IMA raw note into local-first form:
+status: inbox, source_type: ima, Capture filled with fetched text or a local
+snapshot reference, and image references mirrored when possible.
+
+Options:
+  --metadata       Fetch and print metadata only; do not modify the vault.
+  --stdout         Print fetched textual content to stdout; do not modify the vault.
+  --output <path>  Write fetched textual content to a file; do not modify the vault.
+  --force          Replace an existing substantial Capture section.
+  --no-images      Skip image indexing and mirroring.
+  --delay-ms <n>   Delay before IMA API calls. Defaults to 750.
+  --base-url <url> IMA OpenAPI base URL. Defaults to https://ima.qq.com.
 `);
 }
 
@@ -45,88 +78,99 @@ if (!rawArg) {
   process.exit(2);
 }
 
-async function readConfigSecret(name) {
-  try {
-    return (await fs.readFile(path.join(os.homedir(), ".config", "ima", name), "utf8")).trim();
-  } catch {
-    return "";
-  }
-}
-
-async function credentials() {
-  const clientId = await readConfigSecret("client_id") || process.env.IMA_OPENAPI_CLIENTID || process.env.IMA_CLIENT_ID || "";
-  const apiKey = await readConfigSecret("api_key") || process.env.IMA_OPENAPI_APIKEY || process.env.IMA_API_KEY || "";
-  if (!clientId || !apiKey) {
-    fail("Missing IMA credentials. Configure ~/.config/ima/client_id and ~/.config/ima/api_key, or set IMA_OPENAPI_CLIENTID/IMA_OPENAPI_APIKEY.");
-  }
-  return { clientId: clientId.trim(), apiKey: apiKey.trim() };
-}
-
-async function callIma(auth, apiPath, body) {
-  const response = await fetch(`${baseUrl}/${apiPath}`, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "ima-openapi-clientid": auth.clientId,
-      "ima-openapi-apikey": auth.apiKey
-    },
-    body: JSON.stringify(body)
-  });
-  const text = await response.text();
-  let data;
-  try {
-    data = JSON.parse(text);
-  } catch {
-    fail(`IMA API returned non-JSON output for ${apiPath}.`);
-  }
-  if (!response.ok) fail(`IMA HTTP error ${response.status}: ${data?.msg || text.slice(0, 200)}`);
-  if (data.code !== 0) fail(`IMA API business error: ${data.msg || `code ${data.code}`}`);
-  return data.data || {};
-}
-
-async function readRawPointer(fileArg) {
+async function readRawImaNote(fileArg) {
   const absolute = path.isAbsolute(fileArg) ? fileArg : path.join(vault, fileArg);
-  if (!(await exists(absolute))) fail(`Raw pointer not found: ${fileArg}`);
+  if (!(await exists(absolute))) fail(`Raw IMA note not found: ${fileArg}`);
   const content = await fs.readFile(absolute, "utf8");
-  const mediaId = content.match(/media_id:\s*["']?([^"'\n]+)["']?/)?.[1]?.trim();
+  const mediaId = extractMediaId(content);
   if (!mediaId) fail(`No ima_source.media_id found in ${fileArg}`);
-  return { absolute, mediaId };
+  return {
+    absolute,
+    relative: path.relative(vault, absolute).replace(/\\/g, "/"),
+    content,
+    frontmatter: parseFrontmatter(content),
+    mediaId
+  };
 }
 
-async function fetchOriginal(auth, mediaId) {
-  const info = await callIma(auth, "openapi/wiki/v1/get_media_info", { media_id: mediaId });
-  if (Number(info.media_type) === 11 && info.notebook_ext_info?.notebook_id) {
-    const note = await callIma(auth, "openapi/note/v1/get_doc_content", {
-      note_id: info.notebook_ext_info.notebook_id,
-      target_content_format: 0
-    });
-    return { mediaType: info.media_type, content: note.content || "" };
-  }
-
-  const urlInfo = info.url_info || {};
-  if (!urlInfo.url) fail("IMA media has no accessible url_info.url. Use the IMA desktop client to inspect the original.");
-  const response = await fetch(urlInfo.url, { headers: urlInfo.headers || {} });
-  if (!response.ok) fail(`IMA content fetch failed: HTTP ${response.status}`);
-  return { mediaType: info.media_type, content: await response.text() };
-}
-
-const auth = await credentials();
-const pointer = await readRawPointer(rawArg);
-const original = await fetchOriginal(auth, pointer.mediaId);
+const auth = await readImaCredentials();
+const client = createImaClient({ auth, baseUrl, delayMs });
+const note = await readRawImaNote(rawArg);
+const original = await fetchImaOriginal(client, note.mediaId);
+const title = note.frontmatter.title || original.title || note.mediaId;
 
 if (metadataOnly) {
   console.log(JSON.stringify({
-    raw: path.relative(vault, pointer.absolute).replace(/\\/g, "/"),
-    mediaType: original.mediaType,
-    contentLength: original.content.length,
-    output: outputPath || "stdout"
+    raw: note.relative,
+    mediaId: note.mediaId,
+    mediaType: original.mediaTypeLabel,
+    contentType: original.contentType,
+    sourceUrl: original.sourceUrl,
+    textLength: original.content.length,
+    binaryBytes: original.binary?.length || 0,
+    output: outputPath || (stdoutOnly ? "stdout" : "vault"),
+    sideEffects: "none"
   }, null, 2));
   process.exit(0);
 }
 
-if (outputPath) {
-  await fs.writeFile(outputPath, original.content, "utf8");
-  console.log(JSON.stringify({ output: outputPath, contentLength: original.content.length }, null, 2));
-} else {
-  process.stdout.write(original.content);
+if (stdoutOnly) {
+  process.stdout.write(original.content || "");
+  process.exit(0);
 }
+
+if (outputPath) {
+  await fs.writeFile(outputPath, original.content || "", "utf8");
+  console.log(JSON.stringify({ output: outputPath, contentLength: original.content.length }, null, 2));
+  process.exit(0);
+}
+
+if (!force && hasSubstantialCapture(note.content)) {
+  fail(`Refusing to replace existing Capture in ${note.relative}. Use --force to refresh it.`);
+}
+
+const materialized = await materializeOriginal({
+  vault,
+  notePath: note.absolute,
+  title,
+  original
+});
+
+let updated = upsertFrontmatter(note.content, {
+  source_type: "ima",
+  status: "inbox",
+  source_url: original.sourceUrl || note.frontmatter.source_url || "",
+  snapshot_path: materialized.snapshotPath || note.frontmatter.snapshot_path || "",
+  content_hash: materialized.contentHash,
+  capture_method: original.fetchMethod || "ima-openapi",
+  source_quality: "imported"
+});
+
+updated = replaceSection(updated, "Capture", materialized.capture || "_IMA returned metadata but no local content body._");
+updated = replaceSection(updated, "Images", materialized.imageMarkdown || "- Inline Markdown/HTML images are preserved in Capture. `wiki:images` mirrors remote images when image references are present.");
+updated = replaceSection(updated, "Processing Notes", [
+  "- Status: inbox",
+  "- Imported locally from IMA; do not depend on the external platform during routine maintenance or query.",
+  "- Next action: compile durable ideas into wiki pages, close core related links, then mark processed."
+].join("\n"));
+
+await fs.writeFile(note.absolute, updated, "utf8");
+await logImaImport(note.relative, `media_id="${note.mediaId}" refresh="single"`);
+
+let imageResult = { skipped: true, reason: "no image references" };
+if (shouldMirrorImages && hasImageReferences(original.content || "")) {
+  imageResult = runImageAssets({ source: note.relative, enabled: true });
+}
+
+console.log(JSON.stringify({
+  raw: note.relative,
+  status: "inbox",
+  sourceType: "ima",
+  mediaId: note.mediaId,
+  mediaType: original.mediaTypeLabel,
+  textLength: original.content.length,
+  binaryBytes: original.binary?.length || 0,
+  snapshotPath: materialized.snapshotPath,
+  imageResult,
+  next: "Maintain this raw like any other inbox source: distill durable wiki pages, close backlinks, then mark processed."
+}, null, 2));
