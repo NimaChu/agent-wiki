@@ -170,9 +170,10 @@ function App() {
     const hasSearch = needle !== "";
     return graph.nodes.filter((node) => {
       if (!node.id.startsWith("wiki/")) return false;
+      if (!hasSearch) return true;
       const group = node.group ?? inferFallbackGroup(node);
       const searchable = [node.title, node.path, node.type, node.status, group, ...node.tags].join(" ").toLowerCase();
-      return (!hasSearch || searchable.includes(needle)) && (filters.groups.length === 0 || filters.groups.includes(group));
+      return searchable.includes(needle) && (filters.groups.length === 0 || filters.groups.includes(group));
     });
   }, [graph, filters]);
 
