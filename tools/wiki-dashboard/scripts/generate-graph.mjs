@@ -310,7 +310,6 @@ async function main() {
   ).map(([target, sources]) => ({ target, count: sources.length, sources }));
 
   const inbox = nodes.filter((node) => node.id.startsWith("raw/") && node.status === "inbox").length;
-  const imaPointers = nodes.filter((node) => node.id.startsWith("raw/") && node.status === "ima-pointer").length;
   const needsFollowup = nodes.filter((node) => node.id.startsWith("raw/") && node.status === "needs-followup").length;
   const stats = {
     nodes: nodes.length,
@@ -318,9 +317,8 @@ async function main() {
     typedRelations: typedRelations.length,
     rawSources: nodes.filter((node) => node.id.startsWith("raw/")).length,
     wikiPages: nodes.filter((node) => node.id.startsWith("wiki/")).length,
-    pendingRaw: inbox + imaPointers + needsFollowup,
+    pendingRaw: inbox + needsFollowup,
     inbox,
-    imaPointers,
     processed: nodes.filter((node) => node.id.startsWith("raw/") && node.status === "processed").length,
     needsFollowup,
     stale: nodes.filter((node) => node.id.startsWith("raw/") && node.status === "stale").length,
@@ -342,7 +340,6 @@ async function main() {
     processedIssues,
     queues: {
       inbox: nodes.filter((node) => node.id.startsWith("raw/") && node.status === "inbox").map((node) => node.id),
-      imaPointers: nodes.filter((node) => node.id.startsWith("raw/") && node.status === "ima-pointer").map((node) => node.id),
       needsFollowup: nodes.filter((node) => node.id.startsWith("raw/") && node.status === "needs-followup").map((node) => node.id),
       stale: nodes
         .filter((node) => node.id.startsWith("raw/") && node.status === "stale" && !node.supersededBy)

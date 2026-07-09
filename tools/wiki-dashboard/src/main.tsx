@@ -33,7 +33,6 @@ type WikiGraph = {
   processedIssues: Array<{ source: string; reason: string }>;
   queues: {
     inbox: string[];
-    imaPointers?: string[];
     needsFollowup: string[];
     stale: string[];
   };
@@ -1128,7 +1127,6 @@ function Stats({ graph, visibleNodes, visibleEdges, items }: { graph: WikiGraph;
     ["Wiki", graph.stats.wikiPages ?? 0],
     ["Raw", graph.stats.rawSources ?? 0],
     ["Pending", graph.stats.pendingRaw ?? 0],
-    ["IMA Ptr", graph.stats.imaPointers ?? 0],
     ["Inbox", graph.stats.inbox ?? 0],
     ["Processed", graph.stats.processed ?? 0],
     ["Broken", graph.stats.unresolved ?? 0]
@@ -1148,7 +1146,7 @@ function Stats({ graph, visibleNodes, visibleEdges, items }: { graph: WikiGraph;
 }
 
 function QueueSummary({ graph, nodeById, onSelect }: { graph: WikiGraph; nodeById: Map<string, WikiNode>; onSelect: (id: string) => void }) {
-  const ids = [...graph.queues.inbox, ...(graph.queues.imaPointers ?? []), ...graph.queues.needsFollowup, ...graph.queues.stale].slice(0, 8);
+  const ids = [...graph.queues.inbox, ...graph.queues.needsFollowup, ...graph.queues.stale].slice(0, 8);
   const nodes = ids.map((id) => nodeById.get(id)).filter(Boolean) as WikiNode[];
   return (
     <section className="queue-panel">
