@@ -1,0 +1,52 @@
+Title:
+Agent Wiki: A local-first evidence-closed Markdown knowledge base for LLM agents
+
+Author:
+Zijun Chu
+
+Affiliation:
+Independent Researcher
+
+Manuscript type:
+SoftwareX Original Software Publication draft.
+
+Primary target:
+SoftwareX.
+
+Keywords:
+LLM agents; software engineering; local-first software; Markdown; knowledge
+management; evidence-grounded AI; personal knowledge bases; reproducible tools.
+
+Repository:
+https://github.com/NimaChu/agent-wiki
+
+Zenodo DOI:
+https://doi.org/10.5281/zenodo.21252490
+
+Software license:
+MIT License
+
+Local manuscript files:
+paper/journal-agent-wiki/softwarex.tex
+paper/journal-agent-wiki/softwarex.pdf
+paper/journal-agent-wiki/agent-wiki-softwarex-manuscript.pdf
+paper/journal-agent-wiki/highlights.txt
+paper/journal-agent-wiki/cover-letter.md
+
+Case-study status command date:
+2026-07-15
+
+Case-study metrics:
+nodes: 1275
+edges: 5444
+raw_sources: 1137
+wiki_pages: 127
+processed_raw_sources: 1136
+unresolved_links: 0
+invalid_relation_hints: 0
+orphaned_wiki_pages: 0
+processed_source_closure_issues: 0
+
+Submission blockers:
+- final GitHub release tag and Zenodo DOI not yet created for the MIT/src version
+- sanitized case-study snapshot decision remains open

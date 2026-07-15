@@ -27,7 +27,8 @@ If you can open a terminal and talk to an agent, you can have a local knowledge 
 raw/        source notes, snapshots, evidence, image inventories
 wiki/       durable knowledge pages synthesized from raw sources
 templates/  reusable raw and wiki page templates
-scripts/    local CLI for capture, search, lint, repair, images, dashboard
+src/        canonical CLI source for capture, search, lint, repair, and images
+scripts/    backwards-compatible launchers and optional local-only helpers
 tools/      optional local graph dashboard
 ```
 ### And graph visualization
@@ -181,14 +182,22 @@ npm run dashboard:build
 Direct CLI:
 
 ```bash
-node scripts/karpathy-wiki.mjs help
+node src/karpathy-wiki.mjs help
 ```
+
+The legacy `node scripts/karpathy-wiki.mjs ...` entry point remains available
+as a compatibility wrapper.
+
+## License
+
+Agent Wiki is released under the [MIT License](LICENSE.txt).
 
 ## What To Commit
 
 Agent Wiki separates project code from personal knowledge:
 
-- Commit and push reusable tool improvements: scripts, templates, dashboard code, docs.
+- Commit and push reusable tool improvements: `src/`, compatibility launchers,
+  templates, dashboard code, and docs.
 - Keep private or bulky knowledge local: raw captures, snapshots, mirrored assets, personal wiki pages.
 
 This makes the repository useful as open source while keeping your actual knowledge base under your control.

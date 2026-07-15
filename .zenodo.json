@@ -9,6 +9,7 @@
     }
   ],
   "access_right": "open",
+  "license": "mit",
   "keywords": [
     "LLM agents",
     "knowledge base",

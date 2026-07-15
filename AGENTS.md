@@ -12,7 +12,7 @@ When starting in this workspace:
 2. Read `README.md`.
 3. Read `wiki/index.md` before answering from the knowledge base.
 4. Run `npm run wiki:status` before broad maintenance, link repair, or dashboard work.
-5. Use root npm scripts or `node scripts/karpathy-wiki.mjs ...` for automation.
+5. Use root npm scripts or `node src/karpathy-wiki.mjs ...` for automation.
 
 Do not create a separate `codex.md`; this file is the agent rule source of truth.
 
@@ -21,7 +21,8 @@ Do not create a separate `codex.md`; this file is the agent rule source of truth
 - `raw/` is the factual source layer. Do not rewrite source captures after they are stored except for small metadata fixes.
 - `wiki/` is the compiled knowledge layer. Synthesize, link, correct, split, and merge wiki pages as understanding improves.
 - `templates/` contains shared capture and wiki templates.
-- `scripts/` contains the local CLI. Do not depend on globally installed skills.
+- `src/` contains the canonical local CLI implementation. Do not depend on globally installed skills.
+- `scripts/` contains backwards-compatible launchers and optional local-only helpers.
 - `tools/wiki-dashboard/` is read-only graph/dashboard code. It reads Markdown and generated JSON; it is never the source of truth.
 - `.obsidian/`, if added by a user, is optional editor configuration and must not become a runtime dependency.
 

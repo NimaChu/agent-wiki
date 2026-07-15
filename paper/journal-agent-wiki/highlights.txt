@@ -1,0 +1,7 @@
+Highlights
+
+- Agent Wiki stores agent-maintained knowledge in inspectable Markdown files.
+- Raw evidence and synthesized wiki pages remain explicitly separated.
+- Evidence-closure lint prevents processed sources from losing backlinks.
+- Image inventories preserve screenshots and diagrams as local evidence.
+- A 1,137-source case study achieved zero graph-health violations.

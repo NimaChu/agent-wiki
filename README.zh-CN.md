@@ -40,7 +40,8 @@ agent-wiki/
   raw/          原始资料、网页抓取、截图、图片索引
   wiki/         整理后的长期知识页
   templates/    笔记模板
-  scripts/      本地命令
+  src/          核心命令源码
+  scripts/      兼容入口和本地辅助脚本
   tools/        可选的知识图谱 dashboard
 ```
 
@@ -237,6 +238,10 @@ npm run dashboard
 - Firecrawl MCP：如果你想增强网页抓取能力
 - IMA OpenAPI：如果你想桥接已有 IMA 知识库
 - GitHub：如果你想同步和改进这个工具项目
+
+## 开源许可证
+
+Agent Wiki 使用 [MIT License](LICENSE.txt) 开源。
 
 ## 给第一次使用的人
 
