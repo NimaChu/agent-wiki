@@ -20,5 +20,5 @@ updates the manuscript package accordingly.
 - `agent-wiki-softwarex-source.zip`
 - `agent-wiki-flexsim-2026-case-study-dataset.zip`
 
-The software remains licensed under the MIT License. The version-specific Zenodo
-DOI will be added after archival synchronization completes.
+The software remains licensed under the MIT License. The archived release is
+available from Zenodo at https://doi.org/10.5281/zenodo.21366895.

@@ -24,7 +24,7 @@ Release:
 https://github.com/NimaChu/agent-wiki/releases/tag/v0.2.1
 
 Zenodo DOI:
-https://doi.org/10.5281/zenodo.21252445
+https://doi.org/10.5281/zenodo.21366895
 
 Software license:
 MIT License

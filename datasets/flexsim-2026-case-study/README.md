@@ -17,6 +17,8 @@ the captured Autodesk documentation.
 - `schema.json`: file-level schema and omission policy.
 
 The authoritative counts for this snapshot are recorded in `metrics.json`.
+The archived software release containing this dataset is available at
+https://doi.org/10.5281/zenodo.21366895.
 
 ## Exclusions
 

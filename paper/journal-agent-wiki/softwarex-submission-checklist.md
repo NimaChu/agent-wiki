@@ -27,13 +27,13 @@ Checked against the official SoftwareX Guide for Authors on 2026-07-15.
 
 - [x] Public GitHub repository exists.
 - [x] README.md exists and describes installation and use.
-- [ ] Permanent release tag v0.2.1 exists.
+- [x] Permanent release tag v0.2.1 exists.
 - [x] GitHub Release and Zenodo DOI exist.
 - [x] MIT LICENSE.txt has been added.
 - [x] Canonical public CLI source is under the top-level src/ directory; legacy
   scripts/ paths remain as compatibility wrappers.
 - [x] Created a permanent release after license and repository-layout changes.
-- [x] Updated the manuscript metadata tables for v0.2.1 and the Zenodo concept DOI.
+- [x] Updated the manuscript metadata tables to v0.2.1 and its Zenodo DOI.
 - [x] Published a metadata-only FlexSim case-study dataset without third-party
   documentation text, snapshots, or images.
 
