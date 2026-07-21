@@ -74,8 +74,13 @@ function contextAround(text, index, length) {
     .slice(0, 420);
 }
 
+const ATTR_PATTERNS = {
+  src: /src\s*=\s*("([^"]*)"|'([^']*)'|([^\s>]+))/i,
+  alt: /alt\s*=\s*("([^"]*)"|'([^']*)'|([^\s>]+))/i
+};
 function attr(tag, name) {
-  const pattern = new RegExp(`${name}\\s*=\\s*("([^"]*)"|'([^']*)'|([^\\s>]+))`, "i");
+  const pattern = ATTR_PATTERNS[name];
+  if (!pattern) return "";
   const match = tag.match(pattern);
   return match ? (match[2] || match[3] || match[4] || "").trim() : "";
 }
@@ -256,6 +261,12 @@ const shouldDownload = !has("--no-download");
 const shouldUpdateNote = !has("--no-update-note");
 const includeSnapshots = !has("--no-snapshots");
 const sourcePath = path.isAbsolute(sourceArg) ? sourceArg : path.join(vault, sourceArg);
+const resolvedSource = path.resolve(sourcePath);
+const resolvedVault = path.resolve(vault);
+if (!resolvedSource.startsWith(resolvedVault + path.sep) && resolvedSource !== resolvedVault) {
+  console.error("Error: --source path must be within the vault directory.");
+  process.exit(1);
+}
 const noteContent = await fs.readFile(sourcePath, "utf8");
 const frontmatter = parseFrontmatter(noteContent);
 const baseUrl = arg("--base-url", frontmatter.source_url || "");
