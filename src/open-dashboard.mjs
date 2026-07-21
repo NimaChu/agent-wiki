@@ -41,4 +41,4 @@ if (process.platform === "win32") {
 }
 
 openUrl(DASHBOARD_URL);
-console.log(`Opened Agent Wiki frontend: ${DASHBOARD_URL}`);
+console.log(`Opened My Wiki frontend: ${DASHBOARD_URL}`);

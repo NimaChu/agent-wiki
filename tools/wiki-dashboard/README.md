@@ -1,6 +1,6 @@
-# Agent Wiki Frontend
+# My Wiki Frontend
 
-Local read-only frontend for Agent Wiki. The current surface focuses on knowledge graph visualization, and the frontend is intended to grow into the place where users can inspect the local vault, ask local agents questions, and trigger maintenance workflows.
+Local read-only frontend for My Wiki. The current surface focuses on knowledge graph visualization, and the frontend is intended to grow into the place where users can inspect the local vault, ask local agents questions, and trigger maintenance workflows.
 
 ## Commands
 

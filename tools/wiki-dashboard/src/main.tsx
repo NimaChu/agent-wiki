@@ -399,14 +399,14 @@ function App() {
     >
       <header className="top-nav">
         <div className="brand">
-          <div className="brand-mark">A</div>
+          <div className="brand-mark">M</div>
           <div>
-            <h1>Agent Wiki</h1>
+            <h1>My Wiki</h1>
             <p>Local knowledge workspace</p>
           </div>
         </div>
 
-        <section className="search-toolbar" aria-label="Search and filter Agent Wiki pages">
+        <section className="search-toolbar" aria-label="Search and filter My Wiki pages">
           <label className="top-search">
             <span>Search</span>
             <span className="search-input-wrap">
@@ -649,7 +649,7 @@ function GraphView({
       className={`graph-svg ${canRotate ? "can-rotate" : ""} ${focusedGroup ? "is-focused-group" : ""} ${dragMode === "pan" ? "is-panning" : ""} ${dragMode === "rotate" ? "is-rotating" : ""}`}
       viewBox={computedViewBox}
       role="img"
-      aria-label="Agent Wiki knowledge graph"
+      aria-label="My Wiki knowledge graph"
       onPointerDown={startDrag}
       onPointerMove={moveDrag}
       onPointerUp={endDrag}

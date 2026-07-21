@@ -1,4 +1,4 @@
-# Agent Wiki Rules
+# My Wiki Rules
 
 This project is a self-contained Markdown-first LLM wiki. Any agent can use this folder as its working directory and run all core workflows from local files and npm scripts.
 
@@ -56,7 +56,7 @@ npm run dashboard:open
 
 Dashboard/frontend commands are on-demand visualization tools. Do not start or open the dashboard during routine ingest or wiki edits unless the user explicitly asks to view it. When the frontend is already running, its background watcher automatically refreshes derived graph data after `raw/` or `wiki/` Markdown changes; agents do not need to request or run a separate refresh.
 
-Treat short user requests such as `看知识图谱`, `打开知识图谱`, `打开前端`, `打开 dashboard`, `show the graph`, `open the frontend`, or `open the dashboard` as complete requests to run `npm run dashboard:open`. That command should refresh the graph, ensure the local Agent Wiki frontend is running, and open `http://127.0.0.1:5173/` in the browser.
+Treat short user requests such as `看知识图谱`, `打开知识图谱`, `打开前端`, `打开 dashboard`, `show the graph`, `open the frontend`, or `open the dashboard` as complete requests to run `npm run dashboard:open`. That command should refresh the graph, ensure the local My Wiki frontend is running, and open `http://127.0.0.1:5173/` in the browser.
 
 ## Firecrawl MCP
 

@@ -1,6 +1,6 @@
 # Firecrawl MCP
 
-Agent Wiki uses Firecrawl through MCP first. This keeps the vault lightweight and lets agents use hosted Firecrawl scrape/search/interact without adding Firecrawl service code or API SDK dependencies to this repository.
+My Wiki uses Firecrawl through MCP first. This keeps the vault lightweight and lets agents use hosted Firecrawl scrape/search/interact without adding Firecrawl service code or API SDK dependencies to this repository.
 
 ## Installed Workspace Config
 
@@ -33,7 +33,7 @@ Do not commit real API keys. Keep authenticated config in the user's local MCP s
 
 1. Use Firecrawl MCP to scrape, search, or interact with a page.
 2. Review the returned content and select the evidence worth preserving.
-3. Ingest into Agent Wiki with the existing capture command:
+3. Ingest into My Wiki with the existing capture command:
 
 ```bash
 npm run wiki:capture -- --title "Source title" --url "https://example.com"

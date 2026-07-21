@@ -1,4 +1,4 @@
-# Agent Wiki
+# My Wiki
 
 <img width="1536" height="1024" alt="baa1975d853c5267d8b005b65569c09c_origin" src="https://github.com/user-attachments/assets/bea713c3-8d37-427b-ab04-5f601123f252" />
 
@@ -6,11 +6,11 @@ Zero-cost, beginner-friendly local knowledge base for AI agents.
 
 [简体中文](README.zh-CN.md)
 
-Agent Wiki gives you a practical way to own a private Markdown knowledge base without paying for a SaaS app, running a database, learning Obsidian, or building a RAG stack from scratch. Drop it into a workspace, ask your coding agent to capture sources, and let the agent maintain `raw/` evidence, `wiki/` pages, image references, search, lint, and an optional graph dashboard.
+My Wiki gives you a practical way to own a private Markdown knowledge base without paying for a SaaS app, running a database, learning Obsidian, or building a RAG stack from scratch. Drop it into a workspace, ask your coding agent to capture sources, and let the agent maintain `raw/` evidence, `wiki/` pages, image references, search, lint, and an optional graph dashboard.
 
 If you can open a terminal and talk to an agent, you can have a local knowledge base.
 
-## Why Agent Wiki
+## Why My Wiki
 
 - **Zero cost by default**: plain files, local scripts, no hosted database, no required API subscription.
 - **Zero foundation friendly**: the workflow is made for people who want the agent to do the organizing, linking, and maintenance.
@@ -36,7 +36,7 @@ tools/      optional local graph dashboard
 <img width="1895" height="936" alt="75d483a7df92c5e45cd101f3b44775c6_origin" src="https://github.com/user-attachments/assets/30230076-f34e-4749-bfef-84f3a6293b75" />
 
 
-Agent Wiki is intentionally simple: Markdown in, Markdown out. You can inspect everything with a text editor, search it with ripgrep, sync the tool code with GitHub, and keep private knowledge out of commits.
+My Wiki is intentionally simple: Markdown in, Markdown out. You can inspect everything with a text editor, search it with ripgrep, sync the tool code with GitHub, and keep private knowledge out of commits.
 
 ## Quick Start
 
@@ -89,7 +89,7 @@ http://127.0.0.1:5173/
 
 Agents should treat requests like "show the graph", "open the frontend", or "open the dashboard" as a request to run `npm run dashboard:open`.
 
-While the frontend is running, Agent Wiki watches `raw/` and `wiki/` Markdown and refreshes the graph automatically. The watcher exits with the frontend, so normal capture and maintenance do not start or refresh an offline dashboard.
+While the frontend is running, My Wiki watches `raw/` and `wiki/` Markdown and refreshes the graph automatically. The watcher exits with the frontend, so normal capture and maintenance do not start or refresh an offline dashboard.
 
 ## Core Workflow
 
@@ -104,7 +104,7 @@ This keeps the knowledge base honest: raw evidence remains available, while the 
 
 ## Karpathy-Style Wiki Pages
 
-Agent Wiki follows a simple LLM-wiki habit: one durable knowledge unit gets one wiki page.
+My Wiki follows a simple LLM-wiki habit: one durable knowledge unit gets one wiki page.
 
 That means a raw source is not merely summarized once. A useful article, manual, PDF, or transcript may update many wiki pages: one for a concept, one for an API, one for a workflow, one for a comparison, and one for a product or entity. Over time, the wiki becomes a linked map of reusable ideas instead of a pile of one-off summaries.
 
@@ -135,7 +135,7 @@ When a topic page needs visual support, promote only the best images into a `## 
 
 ## Firecrawl MCP, Optional
 
-Agent Wiki works without Firecrawl, but this repo includes a minimal `.mcp.json` for the hosted Firecrawl MCP endpoint:
+My Wiki works without Firecrawl, but this repo includes a minimal `.mcp.json` for the hosted Firecrawl MCP endpoint:
 
 ```text
 https://mcp.firecrawl.dev/v2/mcp
@@ -147,11 +147,11 @@ Use Firecrawl as a capture helper, not as the source of truth:
 
 1. Ask the agent to scrape or search.
 2. Review the useful result.
-3. Save selected evidence into Agent Wiki with `npm run wiki:capture`.
+3. Save selected evidence into My Wiki with `npm run wiki:capture`.
 
 ## IMA Bridge, Optional
 
-Agent Wiki can also import external IMA knowledge base items into local raw notes.
+My Wiki can also import external IMA knowledge base items into local raw notes.
 
 This is optional and requires user-confirmed IMA OpenAPI credentials plus permission to store the selected content locally. The default is now local-first: `wiki:sync-ima` downloads each selected IMA item into `raw/ima/` as a normal `status: inbox` source note. Text goes into `## Capture`, binary originals are mirrored under `raw/snapshots/ima/`, and image-rich notes can be indexed under `raw/assets/`.
 
@@ -207,11 +207,11 @@ for scope, schema, provenance, and licensing details.
 
 ## License
 
-Agent Wiki is released under the [MIT License](LICENSE.txt).
+My Wiki is released under the [MIT License](LICENSE.txt).
 
 ## What To Commit
 
-Agent Wiki separates project code from personal knowledge:
+My Wiki separates project code from personal knowledge:
 
 - Commit and push reusable tool improvements: `src/`, compatibility launchers,
   templates, dashboard code, and docs.
@@ -232,7 +232,7 @@ Optional:
 
 ## Who It Is For
 
-Agent Wiki is for people who want:
+My Wiki is for people who want:
 
 - a local second brain that an agent can maintain,
 - source-grounded answers instead of loose chat history,

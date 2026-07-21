@@ -1,5 +1,5 @@
 {
-  "name": "agent-wiki",
+  "name": "my-wiki",
   "version": "0.2.2",
   "private": true,
   "license": "MIT",
@@ -18,7 +18,7 @@
     "wiki:fetch-ima": "node src/karpathy-wiki.mjs fetch-ima",
     "wiki:distill-query": "node src/karpathy-wiki.mjs distill-query",
     "dataset:flexsim": "node src/export-flexsim-case-study.mjs",
-    "paper:ist-evaluate": "node paper/journal-agent-wiki/experiments/ist-evaluation.mjs",
+    "paper:ist-evaluate": "node paper/journal-my-wiki/experiments/ist-evaluation.mjs",
     "wiki:refresh": "node src/karpathy-wiki.mjs refresh",
     "dashboard": "node src/karpathy-wiki.mjs dashboard",
     "dashboard:open": "node src/open-dashboard.mjs",

@@ -2,9 +2,9 @@
 
 This directory contains helper tools for the Obsidian knowledge vault.
 
-## Agent Wiki Frontend
+## My Wiki Frontend
 
-`wiki-dashboard/` is the local React frontend for Agent Wiki. Today it provides a read-only graph visualization surface; later it can host local-agent Q&A, vault maintenance controls, and other knowledge workflows. It does not require Obsidian.
+`wiki-dashboard/` is the local React frontend for My Wiki. Today it provides a read-only graph visualization surface; later it can host local-agent Q&A, vault maintenance controls, and other knowledge workflows. It does not require Obsidian.
 
 - Obsidian-like graph browsing
 - vault health counts

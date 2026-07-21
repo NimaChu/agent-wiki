@@ -1,6 +1,6 @@
-# Agent Wiki FlexSim 2026 Case-Study Dataset
+# My Wiki FlexSim 2026 Case-Study Dataset
 
-This dataset is a public, derived snapshot of the FlexSim portion of the Agent
+This dataset is a public, derived snapshot of the FlexSim portion of the My
 Wiki case study. It supports inspection of corpus provenance, structural
 features, evidence links, and graph-health measurements without redistributing
 the captured Autodesk documentation.
@@ -34,14 +34,14 @@ owners' terms and are not relicensed here.
 
 ## Reproduction
 
-From an Agent Wiki workspace containing an authorized local FlexSim 2026 capture:
+From a My Wiki workspace containing an authorized local FlexSim 2026 capture:
 
 ```bash
 npm run dataset:flexsim
 ```
 
 The exporter uses an explicit field whitelist. It reads the local source and wiki
-layers, resolves links with Agent Wiki's standard resolver, and rewrites the JSONL
+layers, resolves links with My Wiki's standard resolver, and rewrites the JSONL
 and metrics files in this directory.
 
 ## Scope

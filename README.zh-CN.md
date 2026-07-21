@@ -1,16 +1,16 @@
-# Agent Wiki
+# My Wiki
 
 零成本、零基础，拥有一个 AI Agent 可以帮你维护的本地知识库。
 
 [English](README.md)
 
-你可能已经把资料散落在浏览器收藏夹、聊天记录、PDF、网页、截图和笔记软件里。Agent Wiki 想解决的就是这件事：把有价值的资料整理成一个放在你自己电脑里的知识库，让 AI Agent 帮你入库、整理、检索、总结和持续维护。
+你可能已经把资料散落在浏览器收藏夹、聊天记录、PDF、网页、截图和笔记软件里。My Wiki 想解决的就是这件事：把有价值的资料整理成一个放在你自己电脑里的知识库，让 AI Agent 帮你入库、整理、检索、总结和持续维护。
 
 它不要求你会 RAG，不要求你买知识库 SaaS，不要求你先学 Obsidian，也不要求你搭数据库。它就是一个普通文件夹，里面是 Markdown、图片、原始资料和一些本地命令。
 
 ## 一句话
 
-Agent Wiki 是一个给普通人用的本地知识库模板：
+My Wiki 是一个给普通人用的本地知识库模板：
 
 **你负责提需求，AI Agent 负责整理资料，知识留在你自己的电脑里。**
 
@@ -132,7 +132,7 @@ http://127.0.0.1:5173/
 
 很多人一说知识库就想到向量数据库、embedding、召回、重排、服务部署。对小白来说，这些东西太早了。
 
-Agent Wiki 的思路更简单：
+My Wiki 的思路更简单：
 
 1. 先把资料保存下来。
 2. 再让 AI 帮你整理成可读笔记。
@@ -146,7 +146,7 @@ Agent Wiki 的思路更简单：
 
 普通笔记软件通常需要你自己整理。
 
-Agent Wiki 默认假设：**整理这件事可以交给 AI Agent。**
+My Wiki 默认假设：**整理这件事可以交给 AI Agent。**
 
 你可以让 agent：
 
@@ -193,11 +193,11 @@ Agent Wiki 默认假设：**整理这件事可以交给 AI Agent。**
 https://mcp.firecrawl.dev/v2/mcp
 ```
 
-这可以帮助 agent 抓取一些普通方式不好抓的网页。没有 Firecrawl 也可以使用 Agent Wiki；它只是一个可选增强。
+这可以帮助 agent 抓取一些普通方式不好抓的网页。没有 Firecrawl 也可以使用 My Wiki；它只是一个可选增强。
 
 ## 可选：IMA 桥接
 
-Agent Wiki 也可以把 IMA 知识库里的资料导入成本地 raw。
+My Wiki 也可以把 IMA 知识库里的资料导入成本地 raw。
 
 这个功能是可选的，需要用户明确确认并配置 IMA OpenAPI 凭证，也需要确认这些资料可以保存到本地。默认机制是 local-first：`wiki:sync-ima` 会把选中的 IMA 条目下载到 `raw/ima/`，生成普通的 `status: inbox` 源笔记。文本会写入 `## Capture`，二进制原文件会保存到 `raw/snapshots/ima/`，图片或富图片内容会尽量进入 `raw/assets/` 和图片索引。
 
@@ -243,7 +243,7 @@ npm run dashboard
 
 ## 开源许可证
 
-Agent Wiki 使用 [MIT License](LICENSE.txt) 开源。
+My Wiki 使用 [MIT License](LICENSE.txt) 开源。
 
 ## 给第一次使用的人
 

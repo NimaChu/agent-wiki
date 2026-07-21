@@ -5,7 +5,7 @@ cd /d "%~dp0"
 
 if not exist "tools\wiki-dashboard" exit /b 1
 
-echo [%DATE% %TIME%] Starting Agent Wiki dashboard...>> "tools\wiki-dashboard\dashboard-autostart.log"
+echo [%DATE% %TIME%] Starting My Wiki dashboard...>> "tools\wiki-dashboard\dashboard-autostart.log"
 
 call npm --prefix "tools\wiki-dashboard" run graph >> "tools\wiki-dashboard\dashboard-autostart.log" 2>&1
 if errorlevel 1 exit /b %ERRORLEVEL%

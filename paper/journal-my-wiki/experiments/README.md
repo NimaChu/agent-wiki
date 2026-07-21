@@ -4,6 +4,10 @@ This directory contains the executable evaluation used for the Information and
 Software Technology research article, "Evidence-Closed Knowledge Maintenance
 for LLM Agents: Design and Empirical Evaluation of Agent Wiki."
 
+The evaluated releases used the project's former Agent Wiki name. The project
+is now published as My Wiki; historical paper titles and result-schema field
+names are retained so the archived evaluation remains reproducible.
+
 ## Run
 
 From the repository root, execute:

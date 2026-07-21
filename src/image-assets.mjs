@@ -137,7 +137,7 @@ function guessImageExtension(url, contentType = "") {
 async function fetchBuffer(url) {
   const response = await fetch(url, {
     headers: {
-      "user-agent": "Mozilla/5.0 (Codex Agent Wiki Image Capture)"
+      "user-agent": "Mozilla/5.0 (Codex My Wiki Image Capture)"
     }
   });
   if (!response.ok) throw new Error(`HTTP ${response.status}`);

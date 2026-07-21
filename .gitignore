@@ -3,7 +3,10 @@ node_modules/
 dist/
 .playwright-cli/
 output/
-paper/**/build/
+paper/**
+!paper/**/
+!paper/**/experiments/
+!paper/**/experiments/**
 *.log
 *.pid
 tools/wiki-dashboard/vite.log
