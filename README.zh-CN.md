@@ -36,7 +36,7 @@ Agent Wiki 是一个给普通人用的本地知识库模板：
 ## 它长什么样
 
 ```text
-agent-wiki/
+my-wiki/
   raw/          原始资料、网页抓取、截图、图片索引
   wiki/         整理后的长期知识页
   templates/    笔记模板
@@ -55,8 +55,8 @@ agent-wiki/
 先安装到本地：
 
 ```bash
-git clone https://github.com/NimaChu/agent-wiki.git
-cd agent-wiki
+git clone https://github.com/NimaChu/my-wiki.git
+cd my-wiki
 npm install
 ```
 

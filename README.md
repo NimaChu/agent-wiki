@@ -41,8 +41,8 @@ Agent Wiki is intentionally simple: Markdown in, Markdown out. You can inspect e
 ## Quick Start
 
 ```bash
-git clone https://github.com/NimaChu/agent-wiki.git
-cd agent-wiki
+git clone https://github.com/NimaChu/my-wiki.git
+cd my-wiki
 npm install
 npm run wiki:status
 npm run wiki:lint
