@@ -6,6 +6,8 @@ output/
 /backup/
 /knowledge-base/
 /paper/
+/.mcp.json
+/AGENTS.md
 *.log
 *.pid
 /my-wiki/assets/dashboard/public/wiki-graph.json
