@@ -1,258 +1,191 @@
 # My Wiki
 
-零成本、零基础，拥有一个 AI Agent 可以帮你维护的本地知识库。
+安装一次 Agent Skill，知识库可以放在电脑的任何位置。
 
 [English](README.md)
 
-你可能已经把资料散落在浏览器收藏夹、聊天记录、PDF、网页、截图和笔记软件里。My Wiki 想解决的就是这件事：把有价值的资料整理成一个放在你自己电脑里的知识库，让 AI Agent 帮你入库、整理、检索、总结和持续维护。
+My Wiki 是由 Codex 或 OpenCode 维护的本地 Markdown 知识系统。工具和知识库完全分开：
 
-它不要求你会 RAG，不要求你买知识库 SaaS，不要求你先学 Obsidian，也不要求你搭数据库。它就是一个普通文件夹，里面是 Markdown、图片、原始资料和一些本地命令。
+- My Wiki Skill 只需安装一次；
+- 可以在任意路径创建一个或多个知识库；
+- 用自然语言让 Agent 入库、维护、检索、回答问题和查看图谱；
+- 私有的 `raw/` 和 `wiki/` 不进入工具源码仓库。
 
-## 一句话
+默认不需要云端数据库、向量数据库、Obsidian 或付费 API。
 
-My Wiki 是一个给普通人用的本地知识库模板：
-
-**你负责提需求，AI Agent 负责整理资料，知识留在你自己的电脑里。**
-
-## 适合谁
-
-- 想拥有自己的本地知识库，但不想折腾数据库、向量库、后端服务的人
-- 经常让 AI 帮忙读网页、读文档、总结资料的人
-- 想把 AI 对话里的有用知识沉淀下来，而不是每次从头问的人
-- 想保存图片、截图、官方文档、教程，并在提问时让 AI 一起引用的人
-- 想要一个开源、透明、可迁移的个人知识管理方案的人
-
-## 你能得到什么
-
-- **本地知识库**：所有资料都在你的工作区文件夹里，不绑定任何云服务。
-- **零成本默认可用**：不需要付费订阅，不需要先买数据库或 API。
-- **AI 帮你维护**：你可以让 Codex、Cursor、Claude Code 等 coding agent 帮你入库和整理。
-- **保留原始证据**：网页、文档、截图、图片线索会先进入 `raw/`，以后还能追溯来源。
-- **沉淀可读笔记**：整理后的长期知识放在 `wiki/`，更适合反复查询。
-- **支持图片证据**：重要截图和示意图可以保存到本地，并在回答问题时一起展示。
-- **按需知识图谱**：只有当你想看知识图谱时，才启动本地 dashboard。
-- **私有知识不必上传 GitHub**：GitHub 可以只同步工具代码，你的资料留在本地。
-
-## 它长什么样
+## 架构
 
 ```text
-my-wiki/
-  raw/          原始资料、网页抓取、截图、图片索引
-  wiki/         整理后的长期知识页
-  templates/    笔记模板
-  src/          核心命令源码
-  scripts/      兼容入口和本地辅助脚本
-  tools/        可选的知识图谱 dashboard
+Codex / OpenCode
+       |
+       v
+自包含 My Wiki Skill
+       |
+       +---- personal -> D:\Knowledge\Personal
+       +---- work     -> E:\Knowledge\Work
+       +---- project  -> /Users/me/Projects/acme-vault
 ```
 
-你不需要一开始理解每个目录。记住两点就够了：
+每个知识库拥有自己的数据：
 
-- `raw/` 放原始证据
-- `wiki/` 放整理后的知识
+```text
+my-vault/
+  .my-wiki.json       知识库标记
+  .my-wiki/           本地缓存和运行状态
+  raw/                原始证据、快照和图片
+  wiki/               可复用的知识页面
+  templates/          当前知识库的 Markdown 模板
+```
 
-## 三分钟开始
+安装后的 Skill 同时包含 Agent 工作流、CLI 引擎、模板和 Dashboard，可以独立于源码仓库运行。
 
-先安装到本地：
+## 安装 Skill
+
+需要 Node.js 18+ 和 Git。
 
 ```bash
 git clone https://github.com/NimaChu/my-wiki.git
 cd my-wiki
-npm install
+npm run skill:install
 ```
 
-检查知识库状态：
+安装器会把完整的 `my-wiki/` 目录复制到：
+
+- Codex：`~/.codex/skills/my-wiki`
+- OpenCode：`~/.config/opencode/skills/my-wiki`
+
+也可以只安装一个：
 
 ```bash
-npm run wiki:status
-npm run wiki:lint
-npm run wiki:universes
+npm run skill:install -- --codex-only
+npm run skill:install -- --opencode-only
 ```
 
-然后打开你的 AI coding agent，对它说：
+安装后重启 Codex 或 OpenCode，让 Agent 发现新 Skill。
 
-```text
-维护这个本地知识库。
-```
+仓库开发者可以使用 `npm run skill:install -- --link` 安装目录链接，便于源码修改立即生效。
 
-就可以开始用了。项目规则已经告诉 agent：维护时要分批处理 raw/，把长期有用的知识蒸馏到 wiki/，补证据链接和知识关系；维护宇宙分组时尽量保持数量少、边界宽而稳定，优先合并或改名，不轻易新增顶层宇宙；本地知识维护不等于推 GitHub，也不会默认启动 dashboard。
-
-## 最常见的用法
-
-### 1. 收藏一篇网页
+## 在任意路径创建知识库
 
 ```bash
-npm run wiki:capture -- --title "文章标题" --url "https://example.com"
+node my-wiki/scripts/my-wiki.mjs init "D:\Knowledge\Personal" --name personal --use
 ```
 
-也可以直接让 agent 做：
+这条命令会创建 Markdown 目录结构，注册名为 `personal` 的知识库，并将它设为默认库。以后 Agent 不需要在 My Wiki 源码仓库中工作。
+
+直接对 Agent 说：
 
 ```text
-把这篇文章入库：https://example.com
+把这篇网页入库到 personal 知识库。
+维护知识库。
+查询 FlexSim Process Flow 的相关知识。
+打开知识图谱。
 ```
 
-如果 Dashboard 前端已经在运行，入库或维护造成的 `raw/`、`wiki/` 变化会自动刷新到图谱；如果前端没有运行，则不会因此启动或刷新 Dashboard。
+短指令就够了，Skill 会找到知识库并执行完整流程。
 
-### 2. 查询知识库
+## 多知识库
+
+注册已有知识库，不需要移动文件：
 
 ```bash
-npm run wiki:search -- "你的问题关键词"
+node my-wiki/scripts/my-wiki.mjs vault add work "E:\Knowledge\Work"
+node my-wiki/scripts/my-wiki.mjs vault use work
+node my-wiki/scripts/my-wiki.mjs vault list
+node my-wiki/scripts/my-wiki.mjs where
 ```
 
-或者直接问 agent：
-
-```text
-基于本地知识库，解释一下这个知识点，并给出来源。
-```
-
-### 3. 保存文章里的图片
-
-如果一篇资料里图片很重要，可以运行：
+只为某条命令指定知识库：
 
 ```bash
-npm run wiki:images -- --source raw/source-note.md
+node my-wiki/scripts/my-wiki.mjs --vault personal status
+node my-wiki/scripts/my-wiki.mjs --vault "E:\Knowledge\Work" search "simulation"
 ```
 
-之后 agent 在回答相关问题时，就可以引用这些本地图片。
+知识库查找顺序：
 
-### 4. 看知识图谱
+1. `--vault <名称或路径>`
+2. `MY_WIKI_VAULT` 或兼容的旧环境变量
+3. 当前目录向上最近的 `.my-wiki.json`
+4. `~/.my-wiki/config.json` 中的默认知识库
+5. 为兼容旧版本，最后才使用附近同时包含 `raw/` 和 `wiki/` 的旧知识库
 
-平时不需要启动 dashboard。只有你想看知识之间的连接时再运行：
+## 现有用户迁移
+
+已有 `raw/` 和 `wiki/` 的工作区可以直接注册为默认知识库，不移动任何文件：
 
 ```bash
-npm run dashboard
+node my-wiki/scripts/my-wiki.mjs vault add current "E:\agent-wiki\knowledge-base" --use
 ```
 
-然后打开：
+以后可以再移动知识库并更新注册路径。公开 Git 仓库不再跟踪任何 `raw/` 或 `wiki/` 内容。
 
-```text
-http://127.0.0.1:5173/
-```
+## 工作机制
 
-## 为什么不用一上来就做 RAG
+1. 把网页、PDF、笔记等保存到目标知识库的 `raw/`。
+2. 保留来源信息、快照、图片顺序和必要的视觉证据。
+3. 把可复用知识蒸馏成 `wiki/` 下的原子页面。
+4. Wiki 中的事实链接回 raw，raw 也链接到主要 Wiki 页面。
+5. 使用 status、lint、garden、universes 和 repair-links 检查健康度。
+6. 只有用户要求可视化时才启动 Dashboard。
 
-很多人一说知识库就想到向量数据库、embedding、召回、重排、服务部署。对小白来说，这些东西太早了。
-
-My Wiki 的思路更简单：
-
-1. 先把资料保存下来。
-2. 再让 AI 帮你整理成可读笔记。
-3. 每条结论尽量能回到原始来源。
-4. 需要图的时候，把图也保留下来。
-5. 以后真的需要 RAG，再从这套干净的 Markdown 知识库升级。
-
-也就是说，它不是反对 RAG，而是让你先用最低成本拥有一套可维护、可迁移、可追溯的知识资产。
-
-## 和普通笔记软件有什么不同
-
-普通笔记软件通常需要你自己整理。
-
-My Wiki 默认假设：**整理这件事可以交给 AI Agent。**
-
-你可以让 agent：
-
-- 把网页入库
-- 总结一篇长文
-- 抽取关键知识点
-- 建立主题页
-- 修复坏链接
-- 找出还没整理的资料
-- 给回答附上来源和图片
-
-你更像是在指挥一个资料管理员，而不是从零手动写笔记。
-
-## GitHub 和本地知识的边界
-
-这个仓库适合开源的是工具本身：
-
-- 命令行脚本
-- 模板
-- dashboard
-- README
-- 工作流说明
-
-你的个人知识一般不需要推到 GitHub：
-
-- 抓取的网页
-- 私人笔记
-- 本地图片
-- 文档快照
-- 个人 wiki 页面
-
-简单记：
-
-```text
-改进工具能力 -> 可以提交 GitHub
-维护自己的知识库 -> 留在本地
-```
-
-## 可选：Firecrawl MCP
-
-如果你的 agent 环境支持 MCP，这个项目内置了 Firecrawl MCP 配置：
-
-```text
-https://mcp.firecrawl.dev/v2/mcp
-```
-
-这可以帮助 agent 抓取一些普通方式不好抓的网页。没有 Firecrawl 也可以使用 My Wiki；它只是一个可选增强。
-
-## 可选：IMA 桥接
-
-My Wiki 也可以把 IMA 知识库里的资料导入成本地 raw。
-
-这个功能是可选的，需要用户明确确认并配置 IMA OpenAPI 凭证，也需要确认这些资料可以保存到本地。默认机制是 local-first：`wiki:sync-ima` 会把选中的 IMA 条目下载到 `raw/ima/`，生成普通的 `status: inbox` 源笔记。文本会写入 `## Capture`，二进制原文件会保存到 `raw/snapshots/ima/`，图片或富图片内容会尽量进入 `raw/assets/` 和图片索引。
-
-```bash
-npm run wiki:sync-ima
-npm run wiki:fetch-ima -- raw/ima/source-note.md --metadata
-```
-
-导入后的 IMA raw 和普通 `inbox` 一样维护：让 agent 提炼 durable wiki 页面、补好 raw/wiki 证据链接，最后再标记为 `processed`。旧版本留下的 `ima-pointer` 只作为 legacy 格式存在，需要先用 `npm run wiki:fetch-ima -- raw/ima/source-note.md` 拉成本地 inbox，再走常规维护流程。
-
-详细 agent 流程见：`docs/ima-local-import.md`。
+`processed` 不是简单的进度标签：主要 Wiki 目标可解析、Wiki 已回链证据、后续事项关闭后，raw 才能标记为 processed。
 
 ## 常用命令
 
 ```bash
-npm run wiki:status
-npm run wiki:lint
-npm run wiki:garden
-npm run wiki:universes
-npm run wiki:repair-links
-npm run wiki:search -- "query terms"
-npm run wiki:capture -- --title "Source title" --url "https://example.com"
-npm run wiki:images -- --source raw/source-note.md
-npm run wiki:sync-ima
-npm run wiki:fetch-ima -- raw/ima/source-note.md --metadata
-npm run dashboard
+node my-wiki/scripts/my-wiki.mjs init /path/to/vault --name personal --use
+node my-wiki/scripts/my-wiki.mjs vault list
+node my-wiki/scripts/my-wiki.mjs vault add NAME /path/to/vault
+node my-wiki/scripts/my-wiki.mjs vault use NAME
+node my-wiki/scripts/my-wiki.mjs where
+
+node my-wiki/scripts/my-wiki.mjs --vault NAME status
+node my-wiki/scripts/my-wiki.mjs --vault NAME lint
+node my-wiki/scripts/my-wiki.mjs --vault NAME garden
+node my-wiki/scripts/my-wiki.mjs --vault NAME universes
+node my-wiki/scripts/my-wiki.mjs --vault NAME repair-links
+node my-wiki/scripts/my-wiki.mjs --vault NAME search "关键词"
+node my-wiki/scripts/my-wiki.mjs --vault NAME capture --title "标题" --url "https://example.com"
+node my-wiki/scripts/my-wiki.mjs --vault NAME images --source raw/source-note.md
+node my-wiki/scripts/my-wiki.mjs --vault NAME open-dashboard
 ```
 
-## 需要准备什么
+根目录 npm 命令继续保留，用于源码开发和旧版本兼容。
 
-必需：
+## 知识图谱
 
-- Node.js 18+
-- npm
-- 一个 AI coding agent，比如 Codex、Cursor、Claude Code 等
+Dashboard 可以显示当前知识库的宇宙、Wiki 关系和 raw 证据。它只在需要时启动：
 
-可选：
+```bash
+node my-wiki/scripts/my-wiki.mjs --vault personal open-dashboard
+```
 
-- Obsidian：如果你想用图谱、反链、Markdown 编辑体验
-- Firecrawl MCP：如果你想增强网页抓取能力
-- IMA OpenAPI：如果你想桥接已有 IMA 知识库
-- GitHub：如果你想同步和改进这个工具项目
+使用 `dashboard` 可以只在后台静默启动服务而不打开浏览器。后台 Vite 服务和 watcher 都不会弹出终端窗口。
+
+运行期间 watcher 会跟踪当前知识库的 Markdown。打开另一个知识库时，图谱和 watcher 会切换到新库。
+
+## 图片和网页抓取
+
+My Wiki 会保留图片引用，也可以把有用的远程图片下载到目标知识库。Firecrawl MCP 是可选的网页抓取辅助工具，不是知识库的数据源。
+
+无论使用什么外部抓取工具，最终证据都要写入 `raw/`，再经过正常维护流程。
+
+## 源码仓库结构
+
+```text
+my-wiki/              完整的可安装 Skill
+  scripts/core/       CLI 引擎
+  assets/templates/   init 时复制的模板
+  assets/dashboard/   可选的本地前端
+  tests/              仅用于源码回归测试，安装时不会复制
+knowledge-base/       本地忽略的知识库数据
+paper/                本地忽略的论文和数据材料
+backup/               本地忽略的旧文件
+```
+
+源码仓库不会跟踪用户的 `raw/`、`wiki/`、快照和图片资源。
 
 ## 开源许可证
 
 My Wiki 使用 [MIT License](LICENSE.txt) 开源。
-
-## 给第一次使用的人
-
-不要一开始就追求完美分类。先把资料放进来，然后让 agent 慢慢整理。
-
-你可以从一句话开始：
-
-```text
-维护这个本地知识库。
-```
-
-这就够了。

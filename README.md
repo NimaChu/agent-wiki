@@ -1,243 +1,191 @@
 # My Wiki
 
-<img width="1536" height="1024" alt="baa1975d853c5267d8b005b65569c09c_origin" src="https://github.com/user-attachments/assets/bea713c3-8d37-427b-ab04-5f601123f252" />
-
-Zero-cost, beginner-friendly local knowledge base for AI agents.
+Install one Agent Skill. Keep your knowledge anywhere on your computer.
 
 [简体中文](README.zh-CN.md)
 
-My Wiki gives you a practical way to own a private Markdown knowledge base without paying for a SaaS app, running a database, learning Obsidian, or building a RAG stack from scratch. Drop it into a workspace, ask your coding agent to capture sources, and let the agent maintain `raw/` evidence, `wiki/` pages, image references, search, lint, and an optional graph dashboard.
+My Wiki is a local-first, Markdown-native knowledge system maintained by Codex or OpenCode. The tool and the knowledge vault are independent:
 
-If you can open a terminal and talk to an agent, you can have a local knowledge base.
+- install the My Wiki Skill once;
+- create one or more vaults in any local path;
+- ask your agent to capture, maintain, search, answer, or visualize them;
+- keep private `raw/` evidence and `wiki/` knowledge out of the tool repository.
 
-## Why My Wiki
+No hosted database, vector database, Obsidian installation, or paid API is required.
 
-- **Zero cost by default**: plain files, local scripts, no hosted database, no required API subscription.
-- **Zero foundation friendly**: the workflow is made for people who want the agent to do the organizing, linking, and maintenance.
-- **Local first**: your notes, raw sources, snapshots, and images stay in your workspace.
-- **Agent native**: every folder and command is designed so Codex, Claude Code, Cursor, or another coding agent can keep the vault healthy.
-- **Evidence based**: raw captures stay separate from distilled wiki pages, so answers can point back to sources.
-- **Image aware**: screenshots and diagrams can be mirrored locally and promoted into answer-ready visual evidence.
-- **No dashboard tax**: the graph dashboard is only built or started when you actually want visualization.
-- **GitHub friendly**: publish the tool, keep your private knowledge local.
-
-## What You Get
+## How It Works
 
 ```text
-raw/        source notes, snapshots, evidence, image inventories
-wiki/       durable knowledge pages synthesized from raw sources
-datasets/   public derived datasets without mirrored source content
-templates/  reusable raw and wiki page templates
-src/        canonical CLI source for capture, search, lint, repair, and images
-scripts/    backwards-compatible launchers and optional local-only helpers
-tools/      optional local graph dashboard
+Codex / OpenCode
+       |
+       v
+Self-contained My Wiki Skill
+       |
+       +---- personal -> D:\Knowledge\Personal
+       +---- work     -> E:\Knowledge\Work
+       +---- project  -> /Users/me/Projects/acme-vault
 ```
-### And graph visualization
-<img width="1895" height="936" alt="75d483a7df92c5e45cd101f3b44775c6_origin" src="https://github.com/user-attachments/assets/30230076-f34e-4749-bfef-84f3a6293b75" />
 
+Each vault owns its data:
 
-My Wiki is intentionally simple: Markdown in, Markdown out. You can inspect everything with a text editor, search it with ripgrep, sync the tool code with GitHub, and keep private knowledge out of commits.
+```text
+my-vault/
+  .my-wiki.json       vault marker
+  .my-wiki/           local cache and runtime state
+  raw/                captured evidence, snapshots, and images
+  wiki/               durable knowledge pages
+  templates/          vault-local Markdown templates
+```
 
-## Quick Start
+The installed Skill contains the agent workflow, CLI engine, templates, and Dashboard. It can run after being copied independently of this source checkout.
+
+## Install
+
+Requirements: Node.js 18+ and Git.
 
 ```bash
 git clone https://github.com/NimaChu/my-wiki.git
 cd my-wiki
-npm install
-npm run wiki:status
-npm run wiki:lint
+npm run skill:install
 ```
 
-Then ask your agent:
+The installer copies the complete `my-wiki/` folder into:
+
+- Codex: `~/.codex/skills/my-wiki`
+- OpenCode: `~/.config/opencode/skills/my-wiki`
+
+Install only one integration when needed:
+
+```bash
+npm run skill:install -- --codex-only
+npm run skill:install -- --opencode-only
+```
+
+Restart Codex or OpenCode after installation so it discovers the Skill.
+
+Repository developers can use `npm run skill:install -- --link` to install directory links instead of standalone copies.
+
+## Create A Vault Anywhere
+
+```bash
+node my-wiki/scripts/my-wiki.mjs init "D:\Knowledge\Personal" --name personal --use
+```
+
+This creates the Markdown structure, registers `personal`, and makes it the default vault. The source repository does not need to be the agent's working directory.
+
+Then talk naturally to the agent:
 
 ```text
-Maintain this local knowledge base.
+把这篇网页入库到 personal 知识库。
+维护知识库。
+查询 FlexSim Process Flow 的相关知识。
+打开知识图谱。
 ```
 
-That short request is enough. Project rules tell the agent to process raw sources in batches, distill durable wiki pages, keep evidence links healthy, avoid GitHub sync for local knowledge, and start the dashboard only when you ask for visualization.
+The Skill resolves the default vault and performs the complete workflow without requiring long command prompts.
 
-## Capture A Source
+## Multiple Vaults
+
+Register an existing vault without moving it:
 
 ```bash
-npm run wiki:capture -- --title "Source title" --url "https://example.com"
+node my-wiki/scripts/my-wiki.mjs vault add work "E:\Knowledge\Work"
+node my-wiki/scripts/my-wiki.mjs vault use work
+node my-wiki/scripts/my-wiki.mjs vault list
+node my-wiki/scripts/my-wiki.mjs where
 ```
 
-Search the vault:
+Target a vault for one command:
 
 ```bash
-npm run wiki:search -- "query terms"
+node my-wiki/scripts/my-wiki.mjs --vault personal status
+node my-wiki/scripts/my-wiki.mjs --vault "E:\Knowledge\Work" search "simulation"
 ```
 
-Check health:
+Vault resolution order is:
+
+1. `--vault <registered-name-or-path>`
+2. `MY_WIKI_VAULT` or a legacy vault environment variable
+3. the nearest `.my-wiki.json`
+4. the default in `~/.my-wiki/config.json`
+5. a nearby legacy `raw/` plus `wiki/` vault as a compatibility fallback
+
+## Existing My Wiki Users
+
+An existing checkout that already contains local `raw/` and `wiki/` data remains valid. Register it as the default without moving any files:
 
 ```bash
-npm run wiki:lint
-npm run wiki:garden
-npm run wiki:universes
-npm run wiki:repair-links
+node my-wiki/scripts/my-wiki.mjs vault add current "E:\agent-wiki\knowledge-base" --use
 ```
 
-Open the graph only when you want to see it:
-
-```bash
-npm run dashboard:open
-```
-
-```text
-http://127.0.0.1:5173/
-```
-
-Agents should treat requests like "show the graph", "open the frontend", or "open the dashboard" as a request to run `npm run dashboard:open`.
-
-While the frontend is running, My Wiki watches `raw/` and `wiki/` Markdown and refreshes the graph automatically. The watcher exits with the frontend, so normal capture and maintenance do not start or refresh an offline dashboard.
+You can move the vault later and update the registered path. The public Git repository no longer tracks `raw/` or `wiki/`.
 
 ## Core Workflow
 
-1. Capture source material into `raw/`.
-2. Preserve the original evidence, metadata, snapshots, links, and images.
-3. Distill reusable concepts into `wiki/`.
-4. Link wiki claims back to raw evidence.
-5. Run lint, search, garden, and repair commands as maintenance.
-6. Open the dashboard only when graph visualization is useful.
+1. Capture source material into the selected vault's `raw/` layer.
+2. Preserve source metadata, snapshots, inline image order, and useful visual evidence.
+3. Distill reusable concepts into atomic pages under `wiki/`.
+4. Link wiki claims back to raw evidence and close raw-to-wiki backlinks.
+5. Run local status, lint, garden, universe, and repair checks.
+6. Open the Dashboard only when visualization is requested.
 
-This keeps the knowledge base honest: raw evidence remains available, while the wiki becomes increasingly useful for agent answers.
+`processed` is strict: a raw note is complete only when its primary wiki targets resolve, the wiki links back to the evidence, and follow-up flags are closed.
 
-## Karpathy-Style Wiki Pages
-
-My Wiki follows a simple LLM-wiki habit: one durable knowledge unit gets one wiki page.
-
-That means a raw source is not merely summarized once. A useful article, manual, PDF, or transcript may update many wiki pages: one for a concept, one for an API, one for a workflow, one for a comparison, and one for a product or entity. Over time, the wiki becomes a linked map of reusable ideas instead of a pile of one-off summaries.
-
-Good wiki pages are:
-
-- **Atomic**: one concept, entity, method, API, workflow, comparison, or recurring question.
-- **Reusable**: written so a future agent can answer from it without rereading the full source first.
-- **Linked**: connected to related concepts with Obsidian-style `[[Page Name]]` links.
-- **Evidence backed**: important claims point back to raw source notes.
-- **Small enough to maintain**: split pages that become mixed grab bags; merge pages that are duplicates; keep universes few, broad, and stable, preferring merge or rename over creating new top-level groups.
-
-## Image Evidence
-
-For image-rich articles, tutorials, and official docs, treat images as evidence.
+## CLI Reference
 
 ```bash
-npm run wiki:images -- --source raw/source-note.md
+node my-wiki/scripts/my-wiki.mjs init /path/to/vault --name personal --use
+node my-wiki/scripts/my-wiki.mjs vault list
+node my-wiki/scripts/my-wiki.mjs vault add NAME /path/to/vault
+node my-wiki/scripts/my-wiki.mjs vault use NAME
+node my-wiki/scripts/my-wiki.mjs where
+
+node my-wiki/scripts/my-wiki.mjs --vault NAME status
+node my-wiki/scripts/my-wiki.mjs --vault NAME lint
+node my-wiki/scripts/my-wiki.mjs --vault NAME garden
+node my-wiki/scripts/my-wiki.mjs --vault NAME universes
+node my-wiki/scripts/my-wiki.mjs --vault NAME repair-links
+node my-wiki/scripts/my-wiki.mjs --vault NAME search "query terms"
+node my-wiki/scripts/my-wiki.mjs --vault NAME capture --title "Source title" --url "https://example.com"
+node my-wiki/scripts/my-wiki.mjs --vault NAME images --source raw/source-note.md
+node my-wiki/scripts/my-wiki.mjs --vault NAME open-dashboard
 ```
 
-The image workflow:
+Root npm scripts remain available for repository development and backwards compatibility.
 
-- extracts Markdown and HTML image references,
-- mirrors useful remote images into `raw/assets/<source-note>/`,
-- writes `image-index.json`,
-- updates the raw note with image counts and a `## Images` table.
+## Knowledge Graph
 
-When a topic page needs visual support, promote only the best images into a `## Visual Evidence` section. Agents can then include the relevant screenshots or diagrams when answering questions.
+The optional local frontend shows the selected vault's wiki universes, relationships, and raw evidence. It is started on demand:
 
-## Firecrawl MCP, Optional
+```bash
+node my-wiki/scripts/my-wiki.mjs --vault personal open-dashboard
+```
 
-My Wiki works without Firecrawl, but this repo includes a minimal `.mcp.json` for the hosted Firecrawl MCP endpoint:
+Use `dashboard` instead of `open-dashboard` to start the service silently in the background without opening a browser. Neither command opens a terminal window for the background Vite server or watcher.
+
+While it is running, the watcher refreshes graph data when that vault's Markdown changes. Opening another vault switches the graph and watcher to the newly selected vault.
+
+## Images And Web Capture
+
+My Wiki preserves image references and can mirror useful remote images into the selected vault. Firecrawl MCP remains an optional capture helper for rendered or difficult webpages; it is never the vault's source of truth.
+
+After external capture, durable evidence must still be written into `raw/` and distilled through the normal workflow.
+
+## Repository Layout
 
 ```text
-https://mcp.firecrawl.dev/v2/mcp
+my-wiki/              complete installable Skill
+  scripts/core/       CLI engine
+  assets/templates/   templates copied by `init`
+  assets/dashboard/   optional local frontend
+  tests/              source-only regression tests, excluded from installed copies
+knowledge-base/       local ignored vault data
+paper/                local ignored research materials and datasets
+backup/               local ignored legacy files
 ```
 
-The hosted keyless MCP tier can expose tools such as `scrape`, `search`, and `interact` to MCP-capable agents without a Firecrawl API key, subject to Firecrawl limits. Full Firecrawl tools may require authentication.
-
-Use Firecrawl as a capture helper, not as the source of truth:
-
-1. Ask the agent to scrape or search.
-2. Review the useful result.
-3. Save selected evidence into My Wiki with `npm run wiki:capture`.
-
-## IMA Bridge, Optional
-
-My Wiki can also import external IMA knowledge base items into local raw notes.
-
-This is optional and requires user-confirmed IMA OpenAPI credentials plus permission to store the selected content locally. The default is now local-first: `wiki:sync-ima` downloads each selected IMA item into `raw/ima/` as a normal `status: inbox` source note. Text goes into `## Capture`, binary originals are mirrored under `raw/snapshots/ima/`, and image-rich notes can be indexed under `raw/assets/`.
-
-```bash
-npm run wiki:sync-ima
-npm run wiki:fetch-ima -- raw/ima/source-note.md --metadata
-```
-
-Maintenance treats imported IMA notes like any other inbox raw source: distill durable concepts into `wiki/`, close backlinks to the raw evidence, then mark the raw note `processed`. Older `ima-pointer` notes are legacy records; run `npm run wiki:fetch-ima -- raw/ima/source-note.md` to upgrade one into a local inbox raw note before normal maintenance.
-
-Detailed agent workflow: `docs/ima-local-import.md`.
-
-## Commands
-
-```bash
-npm run wiki:status
-npm run wiki:lint
-npm run wiki:garden
-npm run wiki:universes
-npm run wiki:repair-links
-npm run wiki:search -- "query terms"
-npm run wiki:capture -- --title "Source title" --url "https://example.com"
-npm run wiki:images -- --source raw/source-note.md
-npm run wiki:sync-ima
-npm run wiki:fetch-ima -- raw/ima/source-note.md --metadata
-npm run dashboard
-npm run dashboard:open
-npm run dashboard:build
-```
-
-Direct CLI:
-
-```bash
-node src/karpathy-wiki.mjs help
-```
-
-The legacy `node scripts/karpathy-wiki.mjs ...` entry point remains available
-as a compatibility wrapper.
-
-## Public Case-Study Data
-
-The repository includes a derived FlexSim 2026 case-study dataset containing
-source metadata, content hashes, structural features, and evidence-graph edges.
-It intentionally excludes captured Autodesk documentation text, snapshots, and
-images. Rebuild it from an authorized local capture with:
-
-```bash
-npm run dataset:flexsim
-```
-
-See [`datasets/flexsim-2026-case-study/README.md`](datasets/flexsim-2026-case-study/README.md)
-for scope, schema, provenance, and licensing details.
+The repository deliberately does not track user `raw/`, `wiki/`, snapshots, or mirrored assets.
 
 ## License
 
 My Wiki is released under the [MIT License](LICENSE.txt).
-
-## What To Commit
-
-My Wiki separates project code from personal knowledge:
-
-- Commit and push reusable tool improvements: `src/`, compatibility launchers,
-  templates, dashboard code, and docs.
-- Keep private or bulky knowledge local: raw captures, snapshots, mirrored assets, personal wiki pages.
-
-This makes the repository useful as open source while keeping your actual knowledge base under your control.
-
-## Requirements
-
-- Node.js 18+
-- npm
-
-Optional:
-
-- Obsidian, if you want a human editor with backlinks and graph view.
-- MCP tools such as Firecrawl, when your agent environment supports them.
-- External knowledge connectors, only when you intentionally configure them.
-
-## Who It Is For
-
-My Wiki is for people who want:
-
-- a local second brain that an agent can maintain,
-- source-grounded answers instead of loose chat history,
-- a private knowledge workflow without SaaS lock-in,
-- an open, inspectable alternative to heavyweight RAG stacks,
-- a simple bridge between web capture, Markdown notes, images, and agent search.
-
-Bring your questions. Let the agent tend the garden.

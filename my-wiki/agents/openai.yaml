@@ -1,0 +1,4 @@
+interface:
+  display_name: "My Wiki"
+  short_description: "Capture, maintain, search, and visualize local knowledge vaults"
+  default_prompt: "Use $my-wiki to work with my local Markdown knowledge vault."
