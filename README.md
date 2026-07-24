@@ -72,7 +72,7 @@ My Wiki 不是简单地给每份文档生成一篇摘要。一份有价值的资
 
 ## 探索知识宇宙
 
-<img width="1895" height="936" alt="My Wiki 交互式知识宇宙和全局维护状态" src=".github/assets/knowledge-universe.png" />
+<img width="1785" height="881" alt="My Wiki 交互式知识宇宙和全局维护状态" src="https://raw.githubusercontent.com/NimaChu/my-wiki-skill/main/.github/assets/knowledge-universe.png" />
 
 可选的本地前端不只是把文件画成一团点：
 

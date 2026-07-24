@@ -72,7 +72,7 @@ My Wiki does not merely create one summary per document. A useful source can upd
 
 ## Explore The Knowledge Universe
 
-<img width="1895" height="936" alt="My Wiki interactive knowledge universes and vault overview" src=".github/assets/knowledge-universe.png" />
+<img width="1785" height="881" alt="My Wiki interactive knowledge universes and vault overview" src="https://raw.githubusercontent.com/NimaChu/my-wiki-skill/main/.github/assets/knowledge-universe.png" />
 
 The optional local frontend is more than a folder graph:
 
