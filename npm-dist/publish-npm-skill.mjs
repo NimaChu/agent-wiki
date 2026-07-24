@@ -94,14 +94,13 @@ try {
     process.stdout.write(run(npmCommand, ["pack", "--pack-destination", destination], { cwd: staging }));
   } else {
     let alreadyPublished = false;
-    try {
-      const published = run(npmCommand, ["view", `${packageName}@${metadata.version}`, "version", `--registry=${npmRegistry}`]).trim();
-      if (published === metadata.version) {
-        console.log(`${packageName}@${metadata.version} is already published.`);
-        alreadyPublished = true;
-      }
-    } catch {
-      // A 404 means this version is available to publish.
+    const versionUrl = `${npmRegistry}/${encodeURIComponent(packageName)}/${encodeURIComponent(metadata.version)}`;
+    const versionResponse = await fetch(versionUrl);
+    if (versionResponse.ok) {
+      console.log(`${packageName}@${metadata.version} is already published.`);
+      alreadyPublished = true;
+    } else if (versionResponse.status !== 404) {
+      throw new Error(`Could not check npm version availability (${versionResponse.status}).`);
     }
     if (!alreadyPublished) {
       process.stdout.write(run(npmCommand, ["publish", "--access", "public", `--registry=${npmRegistry}`], { cwd: staging }));
