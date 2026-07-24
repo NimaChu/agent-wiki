@@ -1,6 +1,8 @@
 # My Wiki
 
 ![GitHub stars](https://img.shields.io/github/stars/NimaChu/my-wiki-skill?style=flat-square)
+![npm version](https://img.shields.io/npm/v/my-wiki-skill?style=flat-square)
+![npm downloads](https://img.shields.io/npm/dm/my-wiki-skill?style=flat-square)
 ![Agent Skill](https://img.shields.io/badge/Agent-Skill-111111?style=flat-square)
 ![Local First](https://img.shields.io/badge/Local-First-2E7D32?style=flat-square)
 ![Markdown](https://img.shields.io/badge/Knowledge-Markdown-1565C0?style=flat-square)
@@ -83,22 +85,28 @@ My Wiki 不是简单地给每份文档生成一篇摘要。一份有价值的资
 
 日常入库和维护不会启动 Dashboard。只有当你说“打开知识图谱”“打开前端”或类似需求时，它才会按需运行。
 
-## 直接让 Agent 安装
+## 快速开始
 
-需要准备：Node.js 18+，以及一个能够加载 Skill 或执行本地脚本的 AI Agent。把下面这段话直接发给 Agent：
+需要 Node.js 18+ 和 npm。安装和更新使用同一条命令，重复运行即可原地更新：
 
-```text
-请从 https://github.com/NimaChu/my-wiki-skill 安装 My Wiki Skill。
-可安装的 Skill 位于仓库的 `my-wiki/` 子目录。请使用你自带的 Skill 安装器
-或 GitHub 子目录下载方式，只把这个目录安装到本机 Skill 目录，并命名为 `my-wiki`。
-不要克隆或保留整个仓库，也不要带入任何动态生成的运行文件。安装后确认
-`SKILL.md` 和 `scripts/my-wiki.mjs` 存在，
-告诉我最终安装路径以及是否需要重启 Agent。不要修改或删除任何已有知识库。
+```bash
+npx my-wiki-skill@latest
 ```
 
-Codex 自带的 Skill 安装器会直接下载公开仓库中的 `my-wiki/` 子目录，只有直接下载失败时才回退到 Git sparse checkout。其他支持 Skill 的 Agent 可以采用等价的子目录安装方式。
+国内网络可以使用 npmmirror：
 
-普通 `git clone` 会下载仓库中所有公开跟踪的文件，包括中英文 README、许可证、Zenodo 元数据和 GitHub 图片资源。不过，它仍然**不会**下载任何人的私人知识库、本地 MCP 配置、论文目录、工作区规则或源码测试，因为这些内容根本不在公开仓库中。对普通用户来说，上面的提示词更干净。
+```bash
+npx --registry=https://registry.npmmirror.com my-wiki-skill@latest
+```
+
+也可以直接让 AI Agent 安装：
+
+```text
+帮我安装 My Wiki Skill：npx my-wiki-skill@latest
+国内镜像：npx --registry=https://registry.npmmirror.com my-wiki-skill@latest
+```
+
+安装器会自动探测常见的本地 Agent Skill 目录，并把干净的 `my-wiki` 安装到所有已发现位置。使用 `--dir <Skill目录>` 可以指定其他 Agent；使用 `--list` 可以只查看探测结果。npm 包不包含 Git 仓库元数据、本地知识库、测试、构建产物或运行日志。
 
 安装后继续直接说人话：
 

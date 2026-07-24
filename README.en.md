@@ -1,6 +1,8 @@
 # My Wiki
 
 ![GitHub stars](https://img.shields.io/github/stars/NimaChu/my-wiki-skill?style=flat-square)
+![npm version](https://img.shields.io/npm/v/my-wiki-skill?style=flat-square)
+![npm downloads](https://img.shields.io/npm/dm/my-wiki-skill?style=flat-square)
 ![Agent Skill](https://img.shields.io/badge/Agent-Skill-111111?style=flat-square)
 ![Local First](https://img.shields.io/badge/Local-First-2E7D32?style=flat-square)
 ![Markdown](https://img.shields.io/badge/Knowledge-Markdown-1565C0?style=flat-square)
@@ -83,23 +85,28 @@ The optional local frontend is more than a folder graph:
 
 The Dashboard stays off during ordinary capture and maintenance. It starts only when you ask to see the graph or frontend.
 
-## Install By Asking Your Agent
+## Quick Start
 
-Requirements: Node.js 18+ and a local AI agent that can load Skills or run local scripts. Copy this prompt into your agent:
+Requires Node.js 18+ and npm. Installation and updates use the same command; run it again to update in place:
 
-```text
-Install the My Wiki Skill from https://github.com/NimaChu/my-wiki-skill.
-The installable Skill is the `my-wiki/` subdirectory. Use your native Skill installer
-or a GitHub subdirectory download to install only that directory as `my-wiki` in your
-local Skills folder. Do not clone or retain the whole repository, and do not include any
-generated runtime files in the installed copy. Verify that `SKILL.md` and
-`scripts/my-wiki.mjs` exist, then tell me the installed path and whether
-the agent host needs to be restarted. Do not modify or delete any existing knowledge vault.
+```bash
+npx my-wiki-skill@latest
 ```
 
-Codex's native Skill installer downloads the public `my-wiki/` subdirectory directly and falls back to Git sparse checkout only when necessary. Other Skill-capable agents can use the equivalent subdirectory installation workflow.
+For networks that use npmmirror:
 
-A normal `git clone` downloads every public tracked file in the repository, including both READMEs, the license, Zenodo metadata, and GitHub image assets. It still does **not** download anyone's private vault, local MCP configuration, paper folder, workspace rules, or source-only tests because those files are not part of the public repository. The prompt above is the cleaner choice for ordinary users.
+```bash
+npx --registry=https://registry.npmmirror.com my-wiki-skill@latest
+```
+
+Or give the command directly to your AI agent:
+
+```text
+Install My Wiki Skill for me: npx my-wiki-skill@latest
+China mirror: npx --registry=https://registry.npmmirror.com my-wiki-skill@latest
+```
+
+The installer detects common local Agent Skill roots and installs the clean `my-wiki` Skill into every discovered location. Use `--dir <skills-root>` for another Agent host or `--list` to inspect detected destinations. The npm package contains no Git metadata, personal vault, tests, build output, or runtime logs.
 
 After installation, speak naturally:
 

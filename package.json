@@ -1,6 +1,7 @@
 {
   "name": "my-wiki",
   "version": "0.3.0",
+  "description": "Installer for My Wiki, a local-first evidence-backed Markdown knowledge base Agent Skill.",
   "private": true,
   "license": "MIT",
   "type": "module",
@@ -8,6 +9,8 @@
     "my-wiki": "my-wiki/scripts/my-wiki.mjs"
   },
   "scripts": {
+    "npm:pack-check": "node npm-dist/publish-npm-skill.mjs --dry-run",
+    "npm:publish": "node npm-dist/publish-npm-skill.mjs",
     "skill:install": "node my-wiki/scripts/install.mjs",
     "wiki": "node my-wiki/scripts/my-wiki.mjs",
     "wiki:status": "node my-wiki/scripts/my-wiki.mjs status",
