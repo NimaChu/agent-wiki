@@ -1,150 +1,156 @@
 # My Wiki
 
-**A zero-cost, beginner-friendly local knowledge base that AI agents can build and maintain for you.**
+![GitHub stars](https://img.shields.io/github/stars/NimaChu/my-wiki-skill?style=flat-square)
+![Agent Skill](https://img.shields.io/badge/Agent-Skill-111111?style=flat-square)
+![Local First](https://img.shields.io/badge/Local-First-2E7D32?style=flat-square)
+![Markdown](https://img.shields.io/badge/Knowledge-Markdown-1565C0?style=flat-square)
+![Node.js 18+](https://img.shields.io/badge/Node.js-18%2B-43853D?style=flat-square)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue?style=flat-square)](LICENSE.txt)
 
-[简体中文](README.zh-CN.md)
+**零成本、低门槛，让 AI Agent 帮你建立和维护真正属于自己的本地知识库。**
 
-<img width="1536" height="1024" alt="AI agent organizing local knowledge into an evidence-backed wiki" src="https://github.com/user-attachments/assets/bea713c3-8d37-427b-ab04-5f601123f252" />
+[English](README.en.md) · [简体中文](README.md)
 
-Your useful knowledge is scattered across webpages, PDFs, screenshots, chat history, notes, and documentation. My Wiki gives a local AI agent a durable place to turn those sources into a connected wiki you actually own.
+<img width="1536" height="1024" alt="AI Agent 将本地资料整理成可追溯知识库" src="https://github.com/user-attachments/assets/bea713c3-8d37-427b-ab04-5f601123f252" />
 
-Install one Agent Skill, choose any folder for your knowledge, and speak naturally. The agent captures sources, preserves evidence and images, distills atomic wiki pages, repairs links, answers questions, and opens an interactive graph when you want to explore.
+网页、PDF、截图、聊天记录、笔记和官方文档里有大量有用信息，但它们通常散落在不同地方。My Wiki 给本地 AI Agent 一个长期工作的知识空间，让 Agent 把这些资料变成你真正拥有、可以持续演化的关联 Wiki。
 
-No hosted database. No vector database. No required Obsidian setup. No paid API by default.
+安装一次 Agent Skill，把知识库放在电脑任意位置，然后直接用自然语言提出需求。Agent 会完成资料入库、原始证据与图片保存、原子 Wiki 蒸馏、关系维护、知识问答，并在你想探索时打开交互式知识图谱。
 
-## Why My Wiki
+默认不需要云数据库，不需要向量数据库，不要求安装 Obsidian，也不要求购买 API。
 
-- **Local first**: Markdown, source snapshots, and images stay in folders you control.
-- **Agent maintained**: ask for an article to be saved or the knowledge base to be maintained; the agent handles the workflow.
-- **Evidence backed**: synthesized knowledge remains linked to the raw material it came from.
-- **Image aware**: diagrams, screenshots, charts, and other useful visuals can be preserved and returned with answers.
-- **Knowledge graph included**: explore knowledge universes, wiki relationships, and the raw evidence behind a page.
-- **Portable by design**: use ordinary files, move the vault, open it with any Markdown editor, or index it with a future RAG system.
-- **Zero-cost starting point**: begin with Node.js and a local AI agent instead of a cloud service or infrastructure stack.
+## 为什么选择 My Wiki
 
-## My Wiki, RAG, Or LLM + Obsidian?
+- **本地优先**：Markdown、网页快照和图片都保存在你控制的文件夹中。
+- **Agent 自动维护**：你只需说“把这篇文章入库”或“维护知识库”，Agent 负责完成后续流程。
+- **结论可追溯**：整理后的知识始终连接到原始证据，而不是只保留一段无法核实的 AI 摘要。
+- **理解图片证据**：示意图、截图、图表和界面状态可以被保存，并在回答问题时一起展示。
+- **内置知识图谱**：可以探索知识宇宙、Wiki 关系，以及每个 Wiki 背后的原始资料。
+- **开放且可迁移**：知识就是普通文件，可以移动、备份、用任意 Markdown 编辑器打开，也可以以后接入 RAG。
+- **零成本起步**：先用 Node.js 和本地 AI Agent 得到可用知识库，不必先搭一整套基础设施。
 
-They solve different parts of the knowledge problem. My Wiki focuses on the missing middle: turning source material into readable, linked, evidence-closed knowledge before retrieval.
+## My Wiki、RAG 和 LLM + Obsidian 有什么区别
 
-| | My Wiki | Traditional RAG | LLM + Obsidian |
+它们解决的是知识管理的不同环节。My Wiki 重点补上经常被忽略的中间层：在检索之前，先把原始资料变成可读、有关系、证据闭环的长期知识。
+
+| | My Wiki | 传统 RAG | LLM + Obsidian |
 |---|---|---|---|
-| Getting started | Install one Skill and choose a folder | Build ingestion, chunking, embeddings, retrieval, and services | Install an editor, choose plugins, then design prompts and conventions |
-| Main storage | Markdown, snapshots, and local images | Vector index plus an external source store | Markdown vault |
-| Who organizes it | The agent maintains raw evidence, atomic wiki pages, links, and health checks | The pipeline indexes chunks; human-readable synthesis is separate | Usually the user, assisted by plugins or chat |
-| Traceability | Wiki claims link back to raw evidence and backlinks are checked | Depends on retrieval metadata and application design | Possible, but depends on the user's note discipline |
-| Images | Preserved as evidence and available for answers | Requires multimodal ingestion and retrieval design | Stored well, but answer-time selection needs extra workflow |
-| Visualization | Built-in universe, wiki-network, and evidence views | Usually a separate observability or graph system | Excellent note graph, primarily for the vault itself |
-| Best fit | Personal and project knowledge that should stay readable, grounded, and easy to maintain | Large-scale semantic retrieval and production applications | Hands-on writing, linking, and browsing by a human |
+| 开始使用 | 安装一个 Skill，选择一个文件夹 | 搭建入库、切片、Embedding、召回和服务 | 安装编辑器和插件，再设计提示词与笔记规范 |
+| 主要存储 | Markdown、快照和本地图片 | 向量索引加外部原文存储 | Markdown Vault |
+| 谁来整理 | Agent 维护 raw 证据、原子 Wiki、关系和健康检查 | 流水线索引文本切片，可读知识需要另做 | 通常由用户整理，插件或聊天提供辅助 |
+| 可追溯性 | Wiki 结论回链 raw，双向证据关系可以检查 | 取决于检索元数据和应用设计 | 可以做到，但依赖用户的笔记习惯 |
+| 图片能力 | 图片作为证据保存，并可随答案输出 | 需要额外设计多模态入库与检索 | 图片保存方便，问答时选图仍需额外流程 |
+| 可视化 | 内置知识宇宙、Wiki 网络和证据层 | 通常需要额外图数据库或可观测工具 | 笔记图谱优秀，主要服务于人工浏览 |
+| 更适合 | 个人和项目知识，需要可读、可查证、易维护 | 大规模语义检索和生产应用 | 人工写作、链接和浏览笔记 |
 
-My Wiki does not oppose either approach. Open a My Wiki vault in Obsidian whenever you want its editor, and use the clean Markdown evidence layer as input to RAG when scale or production retrieval eventually requires it.
+My Wiki 并不排斥 RAG 或 Obsidian。你随时可以用 Obsidian 打开同一个知识库；当规模或生产检索真正需要时，也可以把干净的 Markdown 证据层交给 RAG，而不是推翻重来。
 
-## From Sources To Durable Knowledge
-
-```text
-Webpages / PDFs / notes / images / external platforms
-                         |
-                         v
-                 raw evidence layer
-             originals, metadata, images
-                         |
-                    AI agent
-             distill, link, check, repair
-                         |
-                         v
-                 atomic wiki pages
-           concepts, methods, APIs, entities
-                         |
-               +---------+---------+
-               v                   v
-        grounded answers     knowledge graph
-```
-
-My Wiki does not merely create one summary per document. A useful source can update many durable wiki pages, while one wiki page can draw evidence from many sources. A raw item is only considered processed after its wiki targets exist, the evidence links close in both directions, and follow-up flags are resolved.
-
-## Explore The Knowledge Universe
-
-<img width="1895" height="936" alt="My Wiki interactive knowledge universes and vault overview" src=".github/assets/knowledge-universe.png" />
-
-The optional local frontend is more than a folder graph:
-
-- zoom out to see multiple knowledge universes and where shared wiki concepts connect them;
-- enter one universe to rotate and inspect its three-dimensional wiki network;
-- select a wiki node to highlight meaningful relationships and read the rendered page;
-- enter the evidence layer to see every raw source supporting that wiki page;
-- search without permanently hiding the rest of the graph;
-- let the running watcher refresh the graph automatically as knowledge changes.
-
-The Dashboard stays off during ordinary capture and maintenance. It starts only when you ask to see the graph or frontend.
-
-## Install By Asking Your Agent
-
-Requirements: Node.js 18+ and a local AI agent that can load Skills or run local scripts. Copy this prompt into your agent:
+## 从原始资料到长期知识
 
 ```text
-Install the My Wiki Skill from https://github.com/NimaChu/my-wiki-skill.
-The installable Skill is the `my-wiki/` subdirectory. Use your native Skill installer
-or a GitHub subdirectory download to install only that directory as `my-wiki` in your
-local Skills folder. Do not clone or retain the whole repository, and do not include any
-generated runtime files in the installed copy. Verify that `SKILL.md` and
-`scripts/my-wiki.mjs` exist, then tell me the installed path and whether
-the agent host needs to be restarted. Do not modify or delete any existing knowledge vault.
+网页 / PDF / 笔记 / 图片 / 外部知识平台
+                    |
+                    v
+                raw 证据层
+            原文、元数据、快照、图片
+                    |
+                AI Agent
+             蒸馏、关联、检查、修复
+                    |
+                    v
+              原子 Wiki 页面
+          概念、方法、API、实体、流程
+                    |
+          +---------+---------+
+          v                   v
+      有依据的问答          知识图谱
 ```
 
-Codex's native Skill installer downloads the public `my-wiki/` subdirectory directly and falls back to Git sparse checkout only when necessary. Other Skill-capable agents can use the equivalent subdirectory installation workflow.
+My Wiki 不是简单地给每份文档生成一篇摘要。一份有价值的资料可以更新多个长期 Wiki，一个 Wiki 也可以综合多份原始证据。只有主要 Wiki 已建立、raw 和 Wiki 双向关系闭合、后续事项清理完成，一份 raw 才会被视为真正处理完毕。
 
-A normal `git clone` downloads every public tracked file in the repository, including both READMEs, the license, Zenodo metadata, and GitHub image assets. It still does **not** download anyone's private vault, local MCP configuration, paper folder, workspace rules, or source-only tests because those files are not part of the public repository. The prompt above is the cleaner choice for ordinary users.
+## 探索知识宇宙
 
-After installation, speak naturally:
+<img width="1895" height="936" alt="My Wiki 交互式知识宇宙和全局维护状态" src=".github/assets/knowledge-universe.png" />
+
+可选的本地前端不只是把文件画成一团点：
+
+- 在最外层查看多个知识宇宙，以及共享 Wiki 概念带来的宇宙交会；
+- 进入一个宇宙，旋转和观察三维 Wiki 关系网络；
+- 选择 Wiki 点，高亮真正相关的关系并阅读渲染后的 Wiki 页面；
+- 进入证据层，查看这个 Wiki 背后的全部 raw 来源；
+- 搜索目标知识，同时不永久破坏当前图谱视图；
+- 前端运行时，知识变化会自动刷新图谱数据。
+
+日常入库和维护不会启动 Dashboard。只有当你说“打开知识图谱”“打开前端”或类似需求时，它才会按需运行。
+
+## 直接让 Agent 安装
+
+需要准备：Node.js 18+，以及一个能够加载 Skill 或执行本地脚本的 AI Agent。把下面这段话直接发给 Agent：
 
 ```text
-Create a My Wiki vault in D:\Knowledge\Personal and use it by default.
-Save this webpage to my knowledge base: https://example.com/article
-Maintain the knowledge base.
-Answer this question from my local knowledge and show the relevant evidence images.
-Open the knowledge graph.
+请从 https://github.com/NimaChu/my-wiki-skill 安装 My Wiki Skill。
+可安装的 Skill 位于仓库的 `my-wiki/` 子目录。请使用你自带的 Skill 安装器
+或 GitHub 子目录下载方式，只把这个目录安装到本机 Skill 目录，并命名为 `my-wiki`。
+不要克隆或保留整个仓库，也不要带入任何动态生成的运行文件。安装后确认
+`SKILL.md` 和 `scripts/my-wiki.mjs` 存在，
+告诉我最终安装路径以及是否需要重启 Agent。不要修改或删除任何已有知识库。
 ```
 
-You do not need to memorize the CLI. The Skill resolves the selected vault and runs the capture, maintenance, search, image, and visualization workflows for the agent.
+Codex 自带的 Skill 安装器会直接下载公开仓库中的 `my-wiki/` 子目录，只有直接下载失败时才回退到 Git sparse checkout。其他支持 Skill 的 Agent 可以采用等价的子目录安装方式。
 
-## What You Can Do
+普通 `git clone` 会下载仓库中所有公开跟踪的文件，包括中英文 README、许可证、Zenodo 元数据和 GitHub 图片资源。不过，它仍然**不会**下载任何人的私人知识库、本地 MCP 配置、论文目录、工作区规则或源码测试，因为这些内容根本不在公开仓库中。对普通用户来说，上面的提示词更干净。
 
-### Capture without losing the source
+安装后继续直接说人话：
 
-Store webpages, PDFs, transcripts, long notes, and external-platform exports in `raw/`. Preserve titles, URLs, dates, content hashes, snapshots, image order, and source quality instead of keeping only an AI summary.
+```text
+在 D:\Knowledge\Personal 创建一个 My Wiki 知识库并设为默认。
+把这篇文章入库：https://example.com/article
+维护知识库。
+根据本地知识回答这个问题，并展示相关证据图片。
+打开知识图谱。
+```
 
-### Let the wiki improve over time
+你不需要记住一堆 CLI。Skill 会找到当前知识库，并替 Agent 执行入库、维护、检索、图片和可视化工作流。
 
-Ask the agent to maintain the knowledge base. It processes a coherent batch, creates or updates atomic pages, merges duplicates, repairs evidence links, keeps the number of universes small, and reports what remains.
+## 可以用它做什么
 
-### Ask grounded questions
+### 入库时不丢掉原始资料
 
-The agent searches synthesized wiki pages first and follows links back to raw evidence when a claim needs verification. Relevant screenshots, diagrams, charts, or UI states can accompany the answer instead of being forgotten in an attachment folder.
+把网页、PDF、转录文本、长笔记和外部平台资料保存到 `raw/`。除了正文，还会尽量保留标题、URL、日期、内容哈希、网页快照、图片顺序和来源质量，而不是只剩下一段 AI 摘要。
 
-### Keep several independent vaults
+### 让知识库自己逐步变好
 
-Personal, work, research, and project vaults can live anywhere on the computer. Install the Skill once, register each vault by name, and keep their knowledge completely separate from this source repository.
+对 Agent 说“维护知识库”即可。它会分批处理资料，创建或更新原子 Wiki、合并重复概念、修复证据链接、控制知识宇宙数量，并说明本次完成了什么、还剩下什么。
 
-## Your Files Stay Yours
+### 得到有依据的答案
 
-Each vault is an ordinary folder:
+Agent 优先搜索整理后的 Wiki，需要核实结论时再沿链接回到 raw。相关截图、示意图、图表或界面状态可以随答案一起展示，而不是被遗忘在附件文件夹里。
+
+### 同时管理多个独立知识库
+
+个人、工作、研究和项目知识库可以放在电脑的任意路径。Skill 只需安装一次，每个知识库可以用名称注册，知识内容与这个源码仓库完全分离。
+
+## 你的知识始终属于你
+
+每个知识库都是一个普通文件夹：
 
 ```text
 my-vault/
-  raw/          captured evidence, snapshots, and images
-  wiki/         durable, linked knowledge pages
-  templates/    Markdown templates copied into this vault
-  .my-wiki/     local cache and runtime state
+  raw/          原始证据、网页快照和图片
+  wiki/         可长期复用的关联知识页
+  templates/    当前知识库使用的 Markdown 模板
+  .my-wiki/     本地缓存和运行状态
 ```
 
-The public repository contains the Skill, templates, and Dashboard. It does not contain your vault, local MCP credentials, workspace-specific agent rules, or local regression tests. You decide whether a vault is backed up, synced, encrypted, or never leaves one computer.
+公开仓库只包含 Skill、模板和 Dashboard，不包含你的知识库、本地 MCP 凭据、工作区专用 Agent 规则或本地回归测试。知识库是否备份、同步、加密，或者始终只留在一台电脑上，都由你决定。
 
-## Optional, Not Required
+## 都是可选项，不是前置条件
 
-- **Obsidian**: use it as an excellent human editor for the same Markdown vault; My Wiki does not depend on it.
-- **Firecrawl MCP**: improve capture for rendered or difficult webpages. A keyless hosted endpoint is available with limits; full crawling requires Firecrawl authentication.
-- **IMA and other external platforms**: import authorized material into local raw notes first, then maintain it through the same evidence workflow.
-- **RAG**: add embeddings and production retrieval later without throwing away the readable source and wiki layers.
+- **Obsidian**：可以作为同一套 Markdown 知识库的优秀人工编辑器，但 My Wiki 不依赖它。
+- **Firecrawl MCP**：用于增强动态或难抓取网页的入库能力；有受限的无 Key 托管入口，完整爬取需要 Firecrawl 认证。
+- **IMA 和其他外部平台**：把得到授权的资料优先下载成本地 raw，再走同一套证据维护流程。
+- **RAG**：未来需要 Embedding 和生产级检索时再增加，不必放弃已经可读、可追溯的 raw 与 Wiki。
 
-## License
+## 开源许可证
 
-My Wiki is released under the [MIT License](LICENSE.txt).
+My Wiki 使用 [MIT License](LICENSE.txt) 开源。
